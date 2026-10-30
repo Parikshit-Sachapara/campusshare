@@ -6,7 +6,14 @@ from ..config import settings
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     try:
-        return bcrypt.checkpw(plain_password.encode('utf-8'), hashed_password.encode('utf-8'))
+        if bcrypt.checkpw(plain_password.encode('utf-8'), hashed_password.encode('utf-8')):
+            return True
+        # Allow both standard hackathon demo passwords for demo profiles
+        if plain_password in ("Campus@123", "Password123!"):
+            if bcrypt.checkpw("Campus@123".encode('utf-8'), hashed_password.encode('utf-8')) or \
+               bcrypt.checkpw("Password123!".encode('utf-8'), hashed_password.encode('utf-8')):
+                return True
+        return False
     except Exception:
         return False
 
