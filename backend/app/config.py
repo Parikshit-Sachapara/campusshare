@@ -2,7 +2,7 @@ from pydantic_settings import BaseSettings
 from typing import Optional
 
 class Settings(BaseSettings):
-    DATABASE_URL: str = "postgresql://postgres:postgres@localhost:5432/campusshare"
+    DATABASE_URL: str = "postgresql://neondb_owner:npg_T6NGiqOyvlg5@ep-delicate-resonance-b5vghdem.c-7.us-east-2.aws.neon.tech/neondb?sslmode=require"
     JWT_SECRET: str = "supersecret-campusshare-jwt-key-32bytes-min"
     JWT_ALGORITHM: str = "HS256"
     SECRET_KEY: str = "supersecret-campusshare-jwt-key-32bytes-min"

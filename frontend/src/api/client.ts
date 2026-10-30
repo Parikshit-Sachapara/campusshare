@@ -24,10 +24,24 @@ import {
 const getApiBase = () => {
   const envUrl = import.meta.env.VITE_API_URL;
   if (envUrl && envUrl.trim() !== '') {
-    return envUrl.trim();
+    return envUrl.trim().replace(/\/+$/, '');
   }
-  if (typeof window !== 'undefined' && window.location.hostname && window.location.hostname !== 'localhost') {
-    return `http://${window.location.hostname}:8000`;
+  if (typeof window !== 'undefined') {
+    const saved = localStorage.getItem('cs_custom_api_url');
+    if (saved && saved.trim() !== '') {
+      return saved.trim().replace(/\/+$/, '');
+    }
+    const host = window.location.hostname;
+    // Check if running on local machine / LAN
+    if (host === 'localhost' || host === '127.0.0.1') {
+      return 'http://localhost:8000';
+    }
+    const isPrivateIP = /^(192\.168\.|10\.|172\.(1[6-9]|2[0-9]|3[0-1])\.)/.test(host);
+    if (isPrivateIP) {
+      return `http://${host}:8000`;
+    }
+    // Deployed to cloud (Vercel, Netlify, Render, etc.)
+    return 'https://campusshare.onrender.com';
   }
   return 'http://localhost:8000';
 };
