@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: campusshare-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: campusshare
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backend/scripts/init_extensions.sql:/docker-entrypoint-initdb.d/init_extensions.sql:ro
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: campusshare-backend
+    restart: unless-stopped
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/campusshare
+      - JWT_SECRET=supersecret-campusshare-jwt-key-32bytes-min
+      - REFRESH_SECRET=supersecret-campusshare-refresh-key-32bytes-min
+      - QR_SECRET=supersecret-campusshare-qr-verification-token-key
+      - CORS_ORIGINS=http://localhost:5173,http://localhost:3000,http://localhost:80
+      - STORAGE_MODE=local
+      - PORT=8000
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: campusshare-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:

@@ -1,0 +1,159 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  width: 100%;
+}
+
+.label {
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.pickerBox {
+  background-color: var(--milk);
+  border: 1.5px solid var(--oat-200);
+  border-radius: var(--radius-md);
+  padding: var(--space-3);
+  box-shadow: 2px 2px 0 var(--oat-200);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-3);
+}
+
+.monthTitle {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: var(--text-sm);
+  color: var(--ink);
+}
+
+.navBtn {
+  background: transparent;
+  border: 1px solid var(--oat-200);
+  border-radius: var(--radius-sm);
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.navBtn:hover {
+  background-color: var(--oat-100);
+}
+
+.daysGrid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  text-align: center;
+}
+
+.dayName {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--ink-mute);
+  padding: 4px 0;
+  text-transform: uppercase;
+}
+
+.dayBtn {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  font-weight: 500;
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.dayBtn:hover:not(:disabled) {
+  background-color: var(--oat-100);
+  border-color: var(--oat-200);
+}
+
+.selectedDay {
+  background-color: var(--persimmon-500) !important;
+  color: #FFFDF8 !important;
+  font-weight: 700;
+  box-shadow: 1px 1px 0 var(--ink);
+}
+
+.todayDay {
+  border-color: var(--persimmon-500);
+  font-weight: 600;
+}
+
+.disabledDay {
+  color: var(--oat-200);
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+.emptySlot {
+  aspect-ratio: 1;
+}
+
+/* Time Slot Selector */
+.slotGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+}
+
+.slotBtn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px 10px;
+  background-color: var(--milk);
+  border: 1.5px solid var(--oat-200);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--ink);
+  transition: all var(--transition-fast);
+}
+
+.slotBtn:hover:not(:disabled) {
+  border-color: var(--persimmon-500);
+  background-color: var(--persimmon-100);
+}
+
+.selectedSlot {
+  border-color: var(--persimmon-500) !important;
+  background-color: var(--persimmon-500) !important;
+  color: #FFFDF8 !important;
+  box-shadow: 2px 2px 0 var(--ink);
+}
+
+.bookedSlot {
+  background-color: var(--oat-100);
+  color: var(--ink-mute);
+  cursor: not-allowed;
+  opacity: 0.5;
+  text-decoration: line-through;
+}
+
+.slotStatus {
+  font-size: 10px;
+  font-family: var(--font-body);
+  text-transform: uppercase;
+  margin-top: 2px;
+}

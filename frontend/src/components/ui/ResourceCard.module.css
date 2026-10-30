@@ -1,0 +1,141 @@
+.card {
+  position: relative;
+  background-color: var(--milk);
+  border: 1.5px solid var(--ink-border);
+  border-radius: var(--radius-card);
+  box-shadow: var(--card-shadow);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: transform var(--transition-normal), box-shadow var(--transition-normal), border-color var(--transition-normal);
+  padding: var(--space-5);
+  padding-top: calc(var(--space-5) + 8px);
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--card-shadow-hover);
+  border-color: rgba(228, 87, 46, 0.4);
+}
+
+/* Category Tab on Top-Left */
+.categoryTab {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 14px 4px 12px;
+  background-color: var(--oat-100);
+  border-bottom-right-radius: var(--radius-md);
+  border-right: 1.5px solid var(--ink-border);
+  border-bottom: 1.5px solid var(--ink-border);
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--ink);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.tabComputing { background-color: var(--persimmon-100); color: var(--persimmon-600); }
+.tabElectronics { background-color: var(--fern-100); color: var(--fern-600); }
+.tabRobotics { background-color: var(--apricot-100); color: var(--apricot-600); }
+.tabPhotography { background-color: var(--mulberry-100); color: var(--mulberry-600); }
+.tabLaboratories { background-color: var(--lilac-100); color: var(--lilac-500); }
+.tabClassrooms { background-color: var(--oat-100); color: var(--ink); }
+.tabAudioVisual { background-color: var(--persimmon-100); color: var(--persimmon-600); }
+.tabManufacturing { background-color: var(--fern-100); color: var(--fern-600); }
+.tabSports { background-color: var(--apricot-100); color: var(--apricot-600); }
+
+.topRightStatus {
+  align-self: flex-end;
+  margin-bottom: var(--space-2);
+}
+
+.title {
+  font-family: var(--font-heading);
+  font-size: var(--text-md);
+  font-weight: 700;
+  color: var(--ink);
+  line-height: var(--leading-tight);
+  margin-bottom: 6px;
+}
+
+.metaRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-size: var(--text-xs);
+  color: var(--ink-soft);
+  margin-bottom: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.metaItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.description {
+  font-size: var(--text-xs);
+  color: var(--ink-soft);
+  line-height: var(--leading-normal);
+  margin-bottom: var(--space-4);
+  flex-grow: 1;
+}
+
+.specChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: var(--space-4);
+}
+
+.chip {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: var(--radius-sm);
+  background-color: var(--oat-50);
+  border: 1px solid var(--oat-200);
+  color: var(--ink-soft);
+}
+
+.chipAlert {
+  background-color: var(--apricot-100);
+  color: var(--apricot-600);
+  border-color: var(--apricot-500);
+  font-weight: 600;
+}
+
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  border-top: 1.5px solid var(--oat-200);
+  padding-top: var(--space-3);
+  margin-top: auto;
+}
+
+.quantityIndicator {
+  display: flex;
+  flex-direction: column;
+}
+
+.qtyLabel {
+  font-size: 10px;
+  font-family: var(--font-mono);
+  color: var(--ink-mute);
+  text-transform: uppercase;
+}
+
+.qtyVal {
+  font-size: var(--text-xs);
+  font-family: var(--font-mono);
+  font-weight: 700;
+  color: var(--ink);
+}

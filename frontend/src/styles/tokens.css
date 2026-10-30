@@ -1,0 +1,141 @@
+:root {
+  /* Warm Oat & Paper Canvas Palette */
+  --oat-50: #FBF7EF;    /* Primary page canvas */
+  --oat-100: #F4EDE0;   /* Sidebar, subtle panels, wells */
+  --oat-200: #E8DDC9;   /* Borders, dividers, subtle outlines */
+  --milk: #FFFDF8;      /* Cards, modal surfaces, floating popovers */
+
+  /* Deep Forest Ink (STRICTLY NOT black) */
+  --ink: #1D2B25;       /* Primary text */
+  --ink-soft: #4B5A52;  /* Secondary text, captions, metadata */
+  --ink-mute: #7C887F;  /* Placeholders, disabled states */
+  --ink-border: rgba(29, 43, 37, 0.12); /* 1.5px soft-ink card borders */
+
+  /* Brand Accents */
+  --persimmon-500: #E4572E; /* Primary action, student role */
+  --persimmon-600: #C9431D; /* Primary hover */
+  --persimmon-100: #FCE4DA; /* Tint, card hover shadow */
+
+  --fern-500: #3F8F5B;      /* Success, available, owner role */
+  --fern-600: #327549;
+  --fern-100: #DCEFE1;
+
+  --mulberry-500: #7B2D5B;  /* Secondary, manager role, accountability */
+  --mulberry-600: #632349;
+  --mulberry-100: #F1DCE9;
+
+  --lilac-400: #A48BE0;     /* Highlights, admin role, AI features */
+  --lilac-500: #8E71D3;
+  --lilac-100: #EBE4FA;
+
+  --apricot-500: #F08A3C;   /* Warning, pending status */
+  --apricot-600: #D67428;
+  --apricot-100: #FDE6D1;
+
+  --cherry-500: #C22B4B;    /* Danger, rejected, overdue */
+  --cherry-600: #A51E3B;
+  --cherry-100: #F9D9E0;
+
+  --sage-300: #B9D3A8;      /* Heatmap low tier */
+
+  /* Heatmap Scale */
+  --heat-0-25: var(--sage-300);
+  --heat-25-50: var(--fern-500);
+  --heat-50-75: var(--apricot-500);
+  --heat-75-90: var(--persimmon-500);
+  --heat-90-100: var(--mulberry-500);
+
+  /* Role Identity Colors */
+  --role-student: var(--persimmon-500);
+  --role-student-bg: var(--persimmon-100);
+  --role-owner: var(--fern-500);
+  --role-owner-bg: var(--fern-100);
+  --role-manager: var(--mulberry-500);
+  --role-manager-bg: var(--mulberry-100);
+  --role-admin: var(--lilac-400);
+  --role-admin-bg: var(--lilac-100);
+
+  /* Typography */
+  --font-heading: 'Bricolage Grotesque', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-body: 'Instrument Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'IBM Plex Mono', monospace;
+  --font-serif: 'Fraunces', serif;
+
+  /* Font Scale: 12 / 14 / 16 / 18 / 22 / 28 / 40 / 64 */
+  --text-xs: 12px;
+  --text-sm: 14px;
+  --text-base: 16px;
+  --text-md: 18px;
+  --text-lg: 22px;
+  --text-xl: 28px;
+  --text-2xl: 40px;
+  --text-3xl: 64px;
+
+  /* Line Heights */
+  --leading-tight: 1.15;
+  --leading-snug: 1.3;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.65;
+
+  /* Spacing Grid (8px baseline) */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-20: 80px;
+
+  /* Geometry & Radii */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-card: 18px;
+  --radius-full: 9999px;
+
+  /* Soft-Ink Card Signatures */
+  --card-border-width: 1.5px;
+  --card-border: 1.5px solid var(--ink-border);
+  --card-shadow: 4px 4px 0 var(--oat-200);
+  --card-shadow-hover: 6px 6px 0 var(--persimmon-100);
+  --card-shadow-focus: 4px 4px 0 var(--persimmon-500);
+  --button-shadow: 2px 2px 0 var(--ink);
+
+  /* Transitions */
+  --transition-fast: 150ms cubic-bezier(0.2, 0, 0, 1);
+  --transition-normal: 200ms cubic-bezier(0.2, 0, 0, 1);
+  --transition-smooth: 250ms cubic-bezier(0.2, 0, 0, 1);
+
+  /* Layout */
+  --sidebar-width: 260px;
+  --topbar-height: 68px;
+  --max-content-width: 1280px;
+}
+
+/* Dark mode theme variables (Forest night, strictly avoiding pure black) */
+[data-theme="dark"] {
+  --oat-50: #17211C;    /* Deep forest page canvas */
+  --oat-100: #1C2822;   /* Sidebar, panels */
+  --oat-200: #293B32;   /* Borders, dividers */
+  --milk: #1F2D26;      /* Cards, surfaces */
+
+  --ink: #F4EDE0;       /* Light warm text */
+  --ink-soft: #B8C5BC;  /* Secondary text */
+  --ink-mute: #7A8D82;  /* Muted text */
+  --ink-border: rgba(232, 221, 201, 0.16);
+
+  --card-shadow: 4px 4px 0 #111A15;
+  --card-shadow-hover: 6px 6px 0 rgba(228, 87, 46, 0.35);
+  --button-shadow: 2px 2px 0 #0D1410;
+
+  --persimmon-100: rgba(228, 87, 46, 0.22);
+  --fern-100: rgba(63, 143, 91, 0.22);
+  --mulberry-100: rgba(123, 45, 91, 0.25);
+  --lilac-100: rgba(164, 139, 224, 0.22);
+  --apricot-100: rgba(240, 138, 60, 0.22);
+  --cherry-100: rgba(194, 43, 75, 0.25);
+}

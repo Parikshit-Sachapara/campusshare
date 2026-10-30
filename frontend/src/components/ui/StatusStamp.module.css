@@ -1,0 +1,121 @@
+.stamp {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: var(--radius-sm);
+  border-width: 1.5px;
+  border-style: solid;
+  transform: rotate(-4deg);
+  user-select: none;
+  white-space: nowrap;
+  box-shadow: 1px 1px 0 rgba(0, 0, 0, 0.08);
+}
+
+.animateThud {
+  animation: stampThud 220ms cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+@keyframes stampThud {
+  0% {
+    transform: scale(1.4) rotate(4deg);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(0.96) rotate(-5deg);
+    opacity: 1;
+  }
+  80% {
+    transform: scale(1.02) rotate(-3.5deg);
+  }
+  100% {
+    transform: scale(1) rotate(-4deg);
+    opacity: 1;
+  }
+}
+
+/* PENDING (apricot) */
+.pending {
+  color: var(--apricot-500);
+  background-color: var(--apricot-100);
+  border-color: var(--apricot-500);
+}
+
+/* APPROVED (fern) */
+.approved {
+  color: var(--fern-500);
+  background-color: var(--fern-100);
+  border-color: var(--fern-500);
+}
+
+/* REJECTED (cherry) */
+.rejected {
+  color: var(--cherry-500);
+  background-color: var(--cherry-100);
+  border-color: var(--cherry-500);
+}
+
+/* WAITLISTED (lilac) */
+.waitlisted {
+  color: var(--lilac-500);
+  background-color: var(--lilac-100);
+  border-color: var(--lilac-400);
+}
+
+/* CHECKED_OUT (persimmon) */
+.checkedOut {
+  color: var(--persimmon-500);
+  background-color: var(--persimmon-100);
+  border-color: var(--persimmon-500);
+}
+
+/* RETURN_PENDING (mulberry) */
+.returnPending {
+  color: var(--mulberry-500);
+  background-color: var(--mulberry-100);
+  border-color: var(--mulberry-500);
+}
+
+/* COMPLETED (ink-soft) */
+.completed {
+  color: var(--ink-soft);
+  background-color: var(--oat-100);
+  border-color: var(--ink-soft);
+}
+
+/* CANCELLED (ink-mute strike-through) */
+.cancelled {
+  color: var(--ink-mute);
+  background-color: var(--oat-100);
+  border-color: var(--ink-mute);
+  text-decoration: line-through;
+}
+
+/* OVERDUE (cherry, pulsing outline) */
+.overdue {
+  color: var(--cherry-500);
+  background-color: var(--cherry-100);
+  border-color: var(--cherry-500);
+  animation: stampThud 220ms cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards, overduePulse 1.8s infinite ease-in-out;
+}
+
+@keyframes overduePulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(194, 43, 75, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 4px rgba(194, 43, 75, 0.2);
+  }
+}
+
+/* INCIDENT_REPORTED (mulberry with warning mark) */
+.incidentReported {
+  color: var(--mulberry-500);
+  background-color: var(--mulberry-100);
+  border-color: var(--mulberry-500);
+}

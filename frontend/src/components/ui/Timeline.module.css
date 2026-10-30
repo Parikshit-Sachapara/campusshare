@@ -1,0 +1,87 @@
+.container {
+  position: relative;
+  padding-left: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+/* Vertical dotted line like a travel itinerary */
+.container::before {
+  content: '';
+  position: absolute;
+  top: 8px;
+  bottom: 8px;
+  left: 8px;
+  width: 0;
+  border-left: 2.5px dotted var(--fern-500);
+}
+
+.item {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* Round fern nodes */
+.node {
+  position: absolute;
+  left: -28px;
+  top: 3px;
+  width: 17px;
+  height: 17px;
+  border-radius: 50%;
+  background-color: var(--milk);
+  border: 3.5px solid var(--fern-500);
+  box-shadow: 0 0 0 2px var(--fern-100);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nodePersimmon {
+  border-color: var(--persimmon-500);
+  box-shadow: 0 0 0 2px var(--persimmon-100);
+}
+
+.nodeMulberry {
+  border-color: var(--mulberry-500);
+  box-shadow: 0 0 0 2px var(--mulberry-100);
+}
+
+.nodeCherry {
+  border-color: var(--cherry-500);
+  box-shadow: 0 0 0 2px var(--cherry-100);
+}
+
+.time {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--ink-mute);
+}
+
+.title {
+  font-family: var(--font-heading);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.description {
+  font-size: var(--text-xs);
+  color: var(--ink-soft);
+  line-height: var(--leading-normal);
+}
+
+.actorTag {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--ink);
+  background-color: var(--oat-100);
+  padding: 1px 6px;
+  border-radius: var(--radius-sm);
+  display: inline-block;
+  margin-top: 4px;
+  width: fit-content;
+}

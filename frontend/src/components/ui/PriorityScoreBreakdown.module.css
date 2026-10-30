@@ -1,0 +1,98 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  width: 100%;
+}
+
+.topRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.title {
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ink-soft);
+}
+
+.totalScore {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.stackedBar {
+  display: flex;
+  height: 12px;
+  width: 100%;
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  background-color: var(--oat-200);
+  border: 1px solid var(--ink-border);
+}
+
+.segment {
+  height: 100%;
+  transition: width var(--transition-normal);
+  position: relative;
+}
+
+.segmentNeed {
+  background-color: var(--persimmon-500);
+}
+
+.segmentDisadvantage {
+  background-color: var(--apricot-500);
+}
+
+.segmentEfficiency {
+  background-color: var(--fern-500);
+}
+
+.segmentAccountability {
+  background-color: var(--mulberry-500);
+}
+
+.legendGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-2);
+  margin-top: 4px;
+}
+
+@media (min-width: 600px) {
+  .legendGrid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+}
+
+.legendDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.legendLabel {
+  color: var(--ink-soft);
+}
+
+.legendValue {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  color: var(--ink);
+  margin-left: auto;
+}
