@@ -34,3 +34,4 @@ backend/uploads/*
 # OS generated
 .DS_Store
 Thumbs.db
+

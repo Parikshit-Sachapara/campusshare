@@ -48,19 +48,10 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# CORS Configuration
-allowed_origins = [
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
-    "http://localhost:3000",
-]
-if hasattr(settings, "CORS_ORIGINS") and settings.CORS_ORIGINS:
-    extra_origins = [o.strip() for o in settings.CORS_ORIGINS.split(",") if o.strip()]
-    allowed_origins.extend(extra_origins)
-
+# CORS Configuration: allow localhost, local network IPs, and cloud preview domains
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=allowed_origins,
+    allow_origin_regex=r".*",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
