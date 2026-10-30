@@ -26,5 +26,5 @@ RUN mkdir -p /app/uploads
 EXPOSE 8000
 
 # Run database migrations, run seed, and start single-worker ASGI engine
-CMD sh -c "alembic upgrade head && python scripts/seed.py && uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"
+CMD sh -c "alembic upgrade head && python scripts/apply_neon_triggers.py && python scripts/seed.py && uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"
 
