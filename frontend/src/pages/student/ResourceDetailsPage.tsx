@@ -41,7 +41,7 @@ const bookingSchema = z.object({
   startTime: z.string().min(1, 'Please choose a start time'),
   endTime: z.string().min(1, 'Please choose an end time'),
   attendees: z.number().min(1),
-  purpose: z.string().min(5, 'Please provide project or academic purpose (min 5 chars)'),
+  purpose: z.string().min(3, 'Please provide purpose'),
   projectName: z.string().optional(),
 });
 
@@ -111,7 +111,7 @@ export const ResourceDetailsPage: React.FC = () => {
       startTime: '10:00',
       endTime: '12:00',
       attendees: 1,
-      purpose: '',
+      purpose: 'Academic project & laboratory research use',
       projectName: '',
     },
   });
@@ -142,7 +142,7 @@ export const ResourceDetailsPage: React.FC = () => {
     mutationFn: (data: BookingFormData) => {
       const startIso = `${data.bookingDate}T${data.startTime}:00Z`;
       const endIso = `${data.bookingDate}T${data.endTime}:00Z`;
-      const idempotencyKey = `cs_book_${id}_${user.id}_${Date.now()}`;
+      const idempotencyKey = `cs_book_${id}_${user?.id || 'std'}_${Date.now()}`;
       return api.createBooking(
         {
           resource_id: id!,
@@ -204,13 +204,18 @@ export const ResourceDetailsPage: React.FC = () => {
   });
 
   const onSubmit = (data: BookingFormData) => {
-    bookingMutation.mutate(data);
+    const payload = {
+      ...data,
+      bookingDate: data.bookingDate || selectedDate,
+    };
+    bookingMutation.mutate(payload);
   };
 
   const handleSlotClick = (slot: { start: string; end: string }) => {
     setSelectedSlot(slot);
-    setValue('startTime', slot.start);
-    setValue('endTime', slot.end);
+    setValue('bookingDate', selectedDate, { shouldValidate: true });
+    setValue('startTime', slot.start, { shouldValidate: true });
+    setValue('endTime', slot.end, { shouldValidate: true });
   };
 
   if (resLoading) {
@@ -648,7 +653,19 @@ export const ResourceDetailsPage: React.FC = () => {
               </div>
             )}
 
-            <form onSubmit={handleSubmit(onSubmit)} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
+            <form
+              onSubmit={handleSubmit(onSubmit, (errs) => {
+                const first = Object.values(errs)[0];
+                if (first?.message) {
+                  addToast({
+                    title: 'Form Incomplete',
+                    message: String(first.message),
+                    variant: 'danger',
+                  });
+                }
+              })}
+              style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}
+            >
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-3)' }}>
                 <Input
                   label="Start Time"

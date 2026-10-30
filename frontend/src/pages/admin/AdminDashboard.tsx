@@ -1,5 +1,5 @@
 import React from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   ResponsiveContainer,
   BarChart,
@@ -16,9 +16,10 @@ import {
   Sliders,
   ShieldCheck,
   TrendingUp,
+  CheckCircle2,
 } from 'lucide-react';
 import { api } from '../../api/client';
-import { StatCard, Badge, Skeleton } from '../../components/ui';
+import { StatCard, Badge, Skeleton, Button, useToast } from '../../components/ui';
 
 export const AdminDashboard: React.FC = () => {
   const { data: statsData, isLoading } = useQuery({
@@ -155,6 +156,177 @@ export const AdminDashboard: React.FC = () => {
           </ResponsiveContainer>
         </div>
       </div>
+
+      {/* Real-Time Pending Booking Approvals for Admin */}
+      <AdminApprovalSection />
+    </div>
+  );
+};
+
+const AdminApprovalSection: React.FC = () => {
+  const queryClient = useQueryClient();
+  const { addToast } = useToast();
+
+  const { data: queueData, isLoading } = useQuery({
+    queryKey: ['admin-approval-queue'],
+    queryFn: () => api.getApprovalQueue(),
+  });
+
+  const items = queueData?.items || [];
+
+  const approveMutation = useMutation({
+    mutationFn: (id: string) => api.approveBooking(id),
+    onSuccess: (b) => {
+      addToast({
+        title: 'Booking Approved!',
+        message: `Pass code #${b.booking_code} issued to ${b.student_name}.`,
+        variant: 'success',
+      });
+      queryClient.invalidateQueries({ queryKey: ['admin-approval-queue'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-all-bookings'] });
+    },
+    onError: (err: unknown) => {
+      addToast({
+        title: 'Approval Failed',
+        message: (err as Error).message,
+        variant: 'danger',
+      });
+    },
+  });
+
+  const rejectMutation = useMutation({
+    mutationFn: (id: string) => api.rejectBooking(id, 'Institutional capacity conflict'),
+    onSuccess: () => {
+      addToast({
+        title: 'Booking Rejected',
+        message: 'Applicant notified.',
+        variant: 'neutral',
+      });
+      queryClient.invalidateQueries({ queryKey: ['admin-approval-queue'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-all-bookings'] });
+    },
+  });
+
+  return (
+    <div
+      style={{
+        backgroundColor: 'var(--milk)',
+        border: '1.5px solid var(--ink-border)',
+        borderRadius: 'var(--radius-card)',
+        padding: 'var(--space-6)',
+      }}
+    >
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-4)', flexWrap: 'wrap', gap: 12 }}>
+        <div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <h3 style={{ margin: 0, fontSize: 'var(--text-lg)', color: 'var(--ink)' }}>
+              Pending Booking Requests Awaiting Approval
+            </h3>
+            {items.length > 0 && (
+              <Badge variant="persimmon">{items.length} Pending</Badge>
+            )}
+          </div>
+          <p style={{ margin: '4px 0 0', fontSize: 'var(--text-xs)', color: 'var(--ink-soft)' }}>
+            Real-time queue of equipment and facility requests submitted by students.
+          </p>
+        </div>
+        <a
+          href="/approvals"
+          style={{
+            fontSize: 'var(--text-xs)',
+            fontWeight: 700,
+            color: 'var(--persimmon-600)',
+            textDecoration: 'none',
+          }}
+        >
+          Open Advanced Triage Queue &rarr;
+        </a>
+      </div>
+
+      {isLoading ? (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <Skeleton height={60} />
+          <Skeleton height={60} />
+        </div>
+      ) : items.length === 0 ? (
+        <div
+          style={{
+            padding: 'var(--space-6)',
+            textAlign: 'center',
+            backgroundColor: 'var(--oat-50)',
+            borderRadius: 'var(--radius-md)',
+            border: '1px dashed var(--ink-border)',
+            fontSize: 'var(--text-sm)',
+            color: 'var(--ink-soft)',
+          }}
+        >
+          <CheckCircle2 size={24} color="var(--fern-600)" style={{ margin: '0 auto 8px', display: 'block' }} />
+          All booking requests have been processed! No pending items in the queue.
+        </div>
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          {items.map((b) => (
+            <div
+              key={b.id}
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                flexWrap: 'wrap',
+                gap: 12,
+                padding: 'var(--space-4)',
+                backgroundColor: 'var(--oat-50)',
+                borderRadius: 'var(--radius-md)',
+                border: '1px solid var(--oat-200)',
+              }}
+            >
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span style={{ fontWeight: 700, fontSize: 'var(--text-sm)', color: 'var(--ink)' }}>
+                    {b.student_name || 'Student Applicant'}
+                  </span>
+                  <span style={{ fontSize: 'var(--text-xs)', color: 'var(--ink-soft)' }}>
+                    ({b.student_email})
+                  </span>
+                  <Badge variant="persimmon">
+                    Score: {b.priority_score ? b.priority_score.toFixed(1) : '85.0'}
+                  </Badge>
+                </div>
+                <div style={{ fontSize: 'var(--text-xs)', color: 'var(--ink-soft)', marginTop: 4 }}>
+                  Resource: <strong style={{ color: 'var(--ink)' }}>{b.resource_name}</strong> &bull; Requested:{' '}
+                  {new Date(b.start_ts).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })} &ndash;{' '}
+                  {new Date(b.end_ts).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}{' '}
+                  ({new Date(b.start_ts).toLocaleDateString()})
+                </div>
+                {b.purpose && (
+                  <div style={{ fontSize: 'var(--text-xs)', color: 'var(--ink)', marginTop: 4, fontStyle: 'italic' }}>
+                    &ldquo;{b.purpose}&rdquo;
+                  </div>
+                )}
+              </div>
+
+              <div style={{ display: 'flex', gap: 8 }}>
+                <Button
+                  size="sm"
+                  variant="primary"
+                  loading={approveMutation.isPending}
+                  onClick={() => approveMutation.mutate(b.id)}
+                >
+                  Approve
+                </Button>
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  loading={rejectMutation.isPending}
+                  onClick={() => rejectMutation.mutate(b.id)}
+                >
+                  Reject
+                </Button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };

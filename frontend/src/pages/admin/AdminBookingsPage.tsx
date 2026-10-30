@@ -26,7 +26,7 @@ export const AdminBookingsPage: React.FC = () => {
   const { data: bookingsData, isLoading, refetch } = useQuery({
     queryKey: ['admin-all-bookings', statusFilter],
     queryFn: () =>
-      api.getMyBookings({
+      api.getAllBookings({
         status: statusFilter !== 'ALL' ? statusFilter : undefined,
         size: 100,
       }),

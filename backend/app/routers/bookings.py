@@ -4,8 +4,8 @@ from fastapi import APIRouter, Depends, Request, Header, Query, status
 from sqlalchemy.orm import Session
 
 from ..database import get_db
-from ..models import Profile
-from ..models.enums import BookingStatus
+from ..models import Profile, Booking
+from ..models.enums import BookingStatus, UserRole
 from ..schemas.booking import (
     BookingCreate,
     BookingResponse,
@@ -54,6 +54,32 @@ def create_booking(
         client_ip=client_ip,
     )
     return BookingResponse.model_validate(booking)
+
+@router.get("/all", response_model=PaginatedResponse[BookingResponse])
+def get_all_bookings(
+    status: Optional[BookingStatus] = Query(None, description="Filter by status (PENDING, APPROVED, etc.)"),
+    page: int = Query(1, ge=1),
+    page_size: int = Query(100, ge=1, le=500),
+    user: Profile = Depends(require_roles(UserRole.ADMIN, UserRole.MANAGER, UserRole.OWNER)),
+    db: Session = Depends(get_db),
+):
+    """
+    Lists all bookings across the institution for Admin and Manager views.
+    """
+    from sqlalchemy import desc
+    query = db.query(Booking)
+    if status:
+        query = query.filter(Booking.status == status)
+    total = query.count()
+    items = query.order_by(desc(Booking.created_at)).offset((page - 1) * page_size).limit(page_size).all()
+    total_pages = max(1, (total + page_size - 1) // page_size)
+    return PaginatedResponse(
+        items=[BookingResponse.model_validate(b) for b in items],
+        total=total,
+        page=page,
+        page_size=page_size,
+        total_pages=total_pages,
+    )
 
 @router.get("/me", response_model=PaginatedResponse[BookingResponse])
 def get_my_bookings(

@@ -257,10 +257,36 @@ class ApiClient {
   public checkEligibility = (id: string) =>
     this.request<EligibilityEvaluation>(`/resources/${id}/eligibility`);
 
-  public getAvailability = (id: string, date: string) =>
-    this.request<{ resource_id: string; date: string; slots: { start: string; end: string; available: boolean; remaining_capacity?: number }[] }>(
-      `/resources/${id}/availability?date=${date}`
-    );
+  public getAvailability = async (id: string, date: string) => {
+    const res = await this.request<{
+      resource_id: string;
+      date: string;
+      slots: Array<{
+        start?: string;
+        end?: string;
+        start_time?: string;
+        end_time?: string;
+        available: boolean;
+        available_units?: number;
+        total_units?: number;
+      }>;
+    }>(`/resources/${id}/availability?date=${date}`);
+    return {
+      ...res,
+      slots: (res?.slots || []).map((s) => {
+        const start = s.start || s.start_time || '09:00';
+        const end = s.end || s.end_time || '10:00';
+        return {
+          start,
+          end,
+          start_time: start,
+          end_time: end,
+          available: Boolean(s.available),
+          remaining_capacity: s.available_units ?? 1,
+        };
+      }),
+    };
+  };
 
   public getCalendar = (id: string) =>
     this.request<{ resource_id: string; days: { date: string; occupancy_pct: number; status: string }[] }>(
@@ -319,13 +345,39 @@ class ApiClient {
 
   public getBookingTimeline = (id: string) => this.request<TimelineItem[]>(`/bookings/${id}/timeline`);
 
+  public getAllBookings = (params: { status?: string; page?: number; size?: number } = {}) => {
+    const q = new URLSearchParams();
+    if (params.status && params.status !== 'ALL') q.append('status', params.status);
+    if (params.page) q.append('page', String(params.page));
+    if (params.size) q.append('page_size', String(params.size));
+    return this.request<{ items: Booking[]; total: number; page: number; total_pages: number }>(`/bookings/all?${q.toString()}`);
+  };
+
   // Approval Management
-  public getApprovalQueue = (params: Record<string, string | number | undefined> = {}) => {
+  public getApprovalQueue = async (params: Record<string, string | number | undefined> = {}): Promise<{ items: Booking[]; total: number }> => {
     const q = new URLSearchParams();
     Object.entries(params).forEach(([k, v]) => {
       if (v !== undefined) q.append(k, String(v));
     });
-    return this.request<{ items: Booking[]; total: number }>(`/approvals/queue?${q.toString()}`);
+    const res = await this.request<any>(`/approvals/queue?${q.toString()}`);
+    const rawList: any[] = Array.isArray(res) ? res : (res?.items || []);
+    const items: Booking[] = rawList.map((item: any) => {
+      if (item && item.booking) {
+        return {
+          ...item.booking,
+          student: item.student,
+          resource: item.resource,
+          student_name: item.booking?.student_name || item.student?.name || item.student?.full_name || 'Student Applicant',
+          student_email: item.booking?.student_email || item.student?.email || '',
+          resource_name: item.booking?.resource_name || item.resource?.name || 'Campus Resource',
+          eligibility_checks: item.eligibility_checks,
+          conflict_details: item.conflict_details,
+          has_conflicts: item.has_conflicts,
+        };
+      }
+      return item;
+    });
+    return { items, total: items.length };
   };
 
   public approveBooking = (id: string, unit_id?: string) =>
