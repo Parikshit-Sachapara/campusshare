@@ -35,3 +35,4 @@ backend/uploads/*
 .DS_Store
 Thumbs.db
 
+.neon
