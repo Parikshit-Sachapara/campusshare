@@ -146,6 +146,16 @@ class Resource(Base):
     bookings = relationship("Booking", back_populates="resource")
     reviews = relationship("ResourceReview", back_populates="resource")
 
+    @property
+    def primary_image_url(self) -> Optional[str]:
+        if self.images:
+            for img in self.images:
+                if getattr(img, 'is_primary', False) and img.url:
+                    return img.url
+            if self.images[0] and getattr(self.images[0], 'url', None):
+                return self.images[0].url
+        return None
+
 
 # -------------------------------------------------------------
 # 5. RESOURCE UNITS (Physical serial units / single space unit)

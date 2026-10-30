@@ -60,7 +60,8 @@ export interface ResourceUnit {
 
 export interface ResourceImage {
   id: string;
-  image_url: string;
+  image_url?: string;
+  url?: string;
   is_primary: boolean;
   sort_order: number;
 }
@@ -85,15 +86,19 @@ export interface ResourceItem {
   approval_required: boolean;
   training_required: boolean;
   is_restricted: boolean;
+  min_booking_minutes?: number;
+  max_booking_minutes?: number;
+  slot_minutes?: number;
+  advance_booking_days?: number;
   popularity_count: number;
   primary_image_url?: string;
   images?: ResourceImage[];
   units?: ResourceUnit[];
   rule?: {
-    min_duration_minutes: number;
-    max_duration_minutes: number;
-    advance_booking_days: number;
-    cancellation_deadline_hours: number;
+    min_duration_minutes?: number;
+    max_duration_minutes?: number;
+    advance_booking_days?: number;
+    cancellation_deadline_hours?: number;
   };
 }
 

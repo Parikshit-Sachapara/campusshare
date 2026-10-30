@@ -241,8 +241,11 @@ export const ResourceDetailsPage: React.FC = () => {
     );
   }
 
-  const galleryImages = resource.images?.length
-    ? resource.images.map((img) => img.image_url)
+  const parsedImages = (resource.images || [])
+    .map((img: any) => img?.url || img?.image_url)
+    .filter(Boolean);
+  const galleryImages = parsedImages.length > 0
+    ? parsedImages
     : [resource.primary_image_url || 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=800&q=80'];
 
   return (
@@ -299,8 +302,11 @@ export const ResourceDetailsPage: React.FC = () => {
           >
             <div style={{ width: '100%', height: 360, backgroundColor: 'var(--oat-100)', position: 'relative' }}>
               <img
-                src={galleryImages[activeImageIndex]}
+                src={galleryImages[activeImageIndex] || resource.primary_image_url || 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=800&q=80'}
                 alt={resource.name}
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=800&q=80';
+                }}
                 style={{ width: '100%', height: '100%', objectFit: 'cover' }}
               />
               <div
@@ -338,7 +344,14 @@ export const ResourceDetailsPage: React.FC = () => {
                       cursor: 'pointer',
                     }}
                   >
-                    <img src={imgUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    <img
+                      src={imgUrl}
+                      alt=""
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=800&q=80';
+                      }}
+                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                    />
                   </button>
                 ))}
               </div>
@@ -385,13 +398,13 @@ export const ResourceDetailsPage: React.FC = () => {
                 <div>
                   <span style={{ color: 'var(--ink-mute)', display: 'block' }}>Max Booking Duration</span>
                   <span style={{ fontWeight: 600, color: 'var(--ink)' }}>
-                    {resource.rule ? `${Math.round(resource.rule.max_duration_minutes / 60)} hours` : '4 hours'}
+                    {resource.max_booking_minutes ? `${Math.round(resource.max_booking_minutes / 60)} hours` : '4 hours'}
                   </span>
                 </div>
                 <div>
                   <span style={{ color: 'var(--ink-mute)', display: 'block' }}>Advance Booking Window</span>
                   <span style={{ fontWeight: 600, color: 'var(--ink)' }}>
-                    {resource.rule ? `${resource.rule.advance_booking_days} days ahead` : '14 days ahead'}
+                    {resource.advance_booking_days ? `${resource.advance_booking_days} days ahead` : '14 days ahead'}
                   </span>
                 </div>
                 <div>

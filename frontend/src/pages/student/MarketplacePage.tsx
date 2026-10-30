@@ -448,7 +448,7 @@ export const MarketplacePage: React.FC = () => {
                   location={r.location}
                   availableQty={r.available_quantity}
                   totalQty={r.quantity}
-                  maxDurationHours={r.rule ? Math.round(r.rule.max_duration_minutes / 60) : 4}
+                  maxDurationHours={r.max_booking_minutes ? Math.round(r.max_booking_minutes / 60) : r.rule?.max_duration_minutes ? Math.round(r.rule.max_duration_minutes / 60) : 4}
                   requiresTraining={r.training_required}
                   requiresApproval={r.approval_required}
                   description={r.description}
