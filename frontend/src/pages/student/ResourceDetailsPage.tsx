@@ -59,7 +59,7 @@ export const ResourceDetailsPage: React.FC = () => {
     tomorrow.setDate(tomorrow.getDate() + 1);
     return tomorrow.toISOString().split('T')[0];
   });
-  const [selectedSlot, setSelectedSlot] = useState<{ start: string; end: string } | null>(null);
+  const [selectedSlots, setSelectedSlots] = useState<Array<{ start: string; end: string }>>([]);
 
   // 1. Fetch Resource Details
   const { data: resource, isLoading: resLoading, isError } = useQuery({
@@ -211,11 +211,85 @@ export const ResourceDetailsPage: React.FC = () => {
     bookingMutation.mutate(payload);
   };
 
-  const handleSlotClick = (slot: { start: string; end: string }) => {
-    setSelectedSlot(slot);
+  const maxBookingMinutes = resource?.max_booking_minutes || 240;
+
+  const handleSlotClick = (clickedSlot: { start: string; end: string }) => {
+    const slots = availabilityData?.slots || [];
+    const clickedIdx = slots.findIndex(
+      (s) => s.start === clickedSlot.start && s.end === clickedSlot.end
+    );
+    if (clickedIdx === -1) return;
+
+    // Deselect if clicking the only selected slot
+    if (
+      selectedSlots.length === 1 &&
+      selectedSlots[0].start === clickedSlot.start &&
+      selectedSlots[0].end === clickedSlot.end
+    ) {
+      setSelectedSlots([]);
+      setValue('startTime', '', { shouldValidate: true });
+      setValue('endTime', '', { shouldValidate: true });
+      return;
+    }
+
+    if (selectedSlots.length === 0) {
+      // First slot selected
+      setSelectedSlots([clickedSlot]);
+      setValue('bookingDate', selectedDate, { shouldValidate: true });
+      setValue('startTime', clickedSlot.start, { shouldValidate: true });
+      setValue('endTime', clickedSlot.end, { shouldValidate: true });
+      return;
+    }
+
+    // Existing indices
+    const selectedIndices = selectedSlots
+      .map((s) => slots.findIndex((x) => x.start === s.start && x.end === s.end))
+      .filter((i) => i !== -1)
+      .sort((a, b) => a - b);
+
+    const minIdx = selectedIndices[0];
+    const maxIdx = selectedIndices[selectedIndices.length - 1];
+
+    const newMin = Math.min(minIdx, clickedIdx);
+    const newMax = Math.max(maxIdx, clickedIdx);
+    const candidateRange = slots.slice(newMin, newMax + 1);
+
+    // Check if any slot in the range is booked / unavailable
+    const hasUnavailable = candidateRange.some((s) => !s.available);
+    if (hasUnavailable) {
+      // Start a fresh selection at the clicked slot
+      setSelectedSlots([clickedSlot]);
+      setValue('bookingDate', selectedDate, { shouldValidate: true });
+      setValue('startTime', clickedSlot.start, { shouldValidate: true });
+      setValue('endTime', clickedSlot.end, { shouldValidate: true });
+      return;
+    }
+
+    // Compute total duration in minutes
+    const startH = parseInt(candidateRange[0].start.split(':')[0], 10);
+    const startM = parseInt(candidateRange[0].start.split(':')[1], 10);
+    const endH = parseInt(candidateRange[candidateRange.length - 1].end.split(':')[0], 10);
+    const endM = parseInt(candidateRange[candidateRange.length - 1].end.split(':')[1], 10);
+    const durationMin = endH * 60 + endM - (startH * 60 + startM);
+
+    if (durationMin > maxBookingMinutes) {
+      addToast({
+        title: 'Max Booking Duration Exceeded',
+        message: `Maximum allowed booking is ${Math.round(maxBookingMinutes / 60)} hours (${maxBookingMinutes} minutes). Selected single slot.`,
+        variant: 'danger',
+      });
+      setSelectedSlots([clickedSlot]);
+      setValue('bookingDate', selectedDate, { shouldValidate: true });
+      setValue('startTime', clickedSlot.start, { shouldValidate: true });
+      setValue('endTime', clickedSlot.end, { shouldValidate: true });
+      return;
+    }
+
+    // Range accepted!
+    setSelectedSlots(candidateRange);
     setValue('bookingDate', selectedDate, { shouldValidate: true });
-    setValue('startTime', slot.start, { shouldValidate: true });
-    setValue('endTime', slot.end, { shouldValidate: true });
+    setValue('startTime', candidateRange[0].start, { shouldValidate: true });
+    setValue('endTime', candidateRange[candidateRange.length - 1].end, { shouldValidate: true });
   };
 
   if (resLoading) {
@@ -519,6 +593,13 @@ export const ResourceDetailsPage: React.FC = () => {
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 6 }}>
               {(calendarData?.days || []).slice(0, 28).map((d) => {
                 const isSelected = d.date === selectedDate;
+                const advanceDays = resource?.advance_booking_days || 14;
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                const dDate = new Date(d.date);
+                const diffDays = Math.ceil((dDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+                const isBeyondAdvance = diffDays > advanceDays;
+
                 // Heat color based on occupancy_pct
                 let bg = 'var(--sage-300)';
                 if (d.occupancy_pct > 75) bg = 'var(--cherry-500)';
@@ -529,9 +610,19 @@ export const ResourceDetailsPage: React.FC = () => {
                   <button
                     key={d.date}
                     type="button"
+                    disabled={isBeyondAdvance}
                     onClick={() => {
+                      if (isBeyondAdvance) {
+                        addToast({
+                          title: 'Advance Limit Exceeded',
+                          message: `Bookings cannot be placed more than ${advanceDays} days in advance.`,
+                          variant: 'danger',
+                        });
+                        return;
+                      }
                       setSelectedDate(d.date);
-                      setValue('bookingDate', d.date);
+                      setSelectedSlots([]);
+                      setValue('bookingDate', d.date, { shouldValidate: true });
                     }}
                     style={{
                       height: 48,
@@ -542,7 +633,8 @@ export const ResourceDetailsPage: React.FC = () => {
                       flexDirection: 'column',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      cursor: 'pointer',
+                      cursor: isBeyondAdvance ? 'not-allowed' : 'pointer',
+                      opacity: isBeyondAdvance ? 0.35 : 1,
                       gap: 2,
                     }}
                   >
@@ -572,13 +664,18 @@ export const ResourceDetailsPage: React.FC = () => {
               padding: 'var(--space-5)',
             }}
           >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-3)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-3)', flexWrap: 'wrap', gap: 8 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                 <Clock size={16} color="var(--persimmon-500)" />
                 <h4 style={{ margin: 0, fontSize: 'var(--text-sm)', color: 'var(--ink)' }}>
                   Available Time Slots ({selectedDate})
                 </h4>
               </div>
+              {selectedSlots.length > 0 && (
+                <Badge variant="persimmon">
+                  {selectedSlots.length} {selectedSlots.length === 1 ? 'Slot' : 'Slots'} Selected ({watchedStartTime} – {watchedEndTime})
+                </Badge>
+              )}
             </div>
 
             {slotsLoading ? (
@@ -586,7 +683,7 @@ export const ResourceDetailsPage: React.FC = () => {
             ) : availabilityData?.slots && availabilityData.slots.length > 0 ? (
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
                 {availabilityData.slots.map((s, idx) => {
-                  const isPicked = selectedSlot?.start === s.start && selectedSlot?.end === s.end;
+                  const isPicked = selectedSlots.some((sel) => sel.start === s.start && sel.end === s.end);
                   return (
                     <button
                       key={idx}

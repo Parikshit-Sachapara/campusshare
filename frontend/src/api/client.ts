@@ -337,7 +337,7 @@ class ApiClient {
       if (v !== undefined) q.append(k, String(v));
     });
     return this.request<{ items: Booking[]; total: number; page: number; size: number }>(
-      `/bookings/my?${q.toString()}`
+      `/bookings/me?${q.toString()}`
     );
   };
 

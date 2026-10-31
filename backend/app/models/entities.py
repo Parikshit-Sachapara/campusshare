@@ -342,6 +342,26 @@ class Booking(Base):
     conditions = relationship("BookingCondition", back_populates="booking", cascade="all, delete-orphan")
     review = relationship("ResourceReview", back_populates="booking", uselist=False)
 
+    @property
+    def resource_name(self) -> Optional[str]:
+        return self.resource.name if self.resource else None
+
+    @property
+    def resource_type(self) -> Optional[ResourceType]:
+        return self.resource.resource_type if self.resource else None
+
+    @property
+    def student_name(self) -> Optional[str]:
+        return self.student.full_name if self.student else None
+
+    @property
+    def student_email(self) -> Optional[str]:
+        return self.student.email if self.student else None
+
+    @property
+    def unit_code(self) -> Optional[str]:
+        return self.unit.unit_code if self.unit else None
+
 
 # -------------------------------------------------------------
 # 11. BOOKING CONDITIONS (Pickup / Return condition inspections)

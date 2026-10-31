@@ -81,6 +81,7 @@ def get_all_bookings(
         total_pages=total_pages,
     )
 
+@router.get("/my", response_model=PaginatedResponse[BookingResponse])
 @router.get("/me", response_model=PaginatedResponse[BookingResponse])
 def get_my_bookings(
     status: Optional[BookingStatus] = Query(None, description="Filter by status (PENDING, APPROVED, etc.)"),
