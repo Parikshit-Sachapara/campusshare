@@ -41,7 +41,7 @@ const getApiBase = () => {
       return `http://${host}:8000`;
     }
     // Cloudflare public tunnel (zero interstitial screen, zero CORS block, works globally)
-    return 'https://solar-automatically-myers-decor.trycloudflare.com';
+    return 'https://punk-hong-axis-missions.trycloudflare.com';
   }
   return 'http://localhost:8000';
 };
