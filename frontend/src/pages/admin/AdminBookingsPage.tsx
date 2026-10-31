@@ -34,6 +34,7 @@ export const AdminBookingsPage: React.FC = () => {
         status: statusFilter !== 'ALL' ? statusFilter : undefined,
         size: 100,
       }),
+    refetchInterval: 5000,
   });
 
   const approveMutation = useMutation({

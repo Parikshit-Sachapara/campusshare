@@ -40,8 +40,8 @@ const getApiBase = () => {
     if (isPrivateIP) {
       return `http://${host}:8000`;
     }
-    // Deployed to cloud (Vercel, Netlify, Render, etc.)
-    return 'https://campusshare-backend.loca.lt';
+    // Cloudflare public tunnel (zero interstitial screen, zero CORS block, works globally)
+    return 'https://solar-automatically-myers-decor.trycloudflare.com';
   }
   return 'http://localhost:8000';
 };

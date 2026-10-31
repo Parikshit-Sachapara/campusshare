@@ -196,6 +196,7 @@ const AdminApprovalSection: React.FC = () => {
   const { data: queueData, isLoading } = useQuery({
     queryKey: ['admin-approval-queue'],
     queryFn: () => api.getApprovalQueue(),
+    refetchInterval: 5000,
   });
 
   const items = queueData?.items || [];

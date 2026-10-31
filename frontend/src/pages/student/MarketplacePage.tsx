@@ -39,9 +39,17 @@ export const MarketplacePage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || '');
   const [selectedCategory, setSelectedCategory] = useState<string>(searchParams.get('category') || 'ALL');
   const [selectedDept, setSelectedDept] = useState<string>('ALL');
-  const [selectedType, setSelectedType] = useState<string>('ALL');
+  const [includeEquipment, setIncludeEquipment] = useState<boolean>(true);
+  const [includeFacility, setIncludeFacility] = useState<boolean>(true);
   const [eligibleOnly, setEligibleOnly] = useState<boolean>(false);
   const [sortBy, setSortBy] = useState<string>('popularity');
+
+  const selectedType =
+    includeEquipment && !includeFacility
+      ? 'EQUIPMENT'
+      : !includeEquipment && includeFacility
+      ? 'FACILITY'
+      : 'ALL';
 
   // Fetch departments
   const { data: departments } = useQuery({
@@ -116,7 +124,8 @@ export const MarketplacePage: React.FC = () => {
     setSearchQuery('');
     setSelectedCategory('ALL');
     setSelectedDept('ALL');
-    setSelectedType('ALL');
+    setIncludeEquipment(true);
+    setIncludeFacility(true);
     setEligibleOnly(false);
     setSortBy('popularity');
     setSearchParams({});
@@ -398,28 +407,55 @@ export const MarketplacePage: React.FC = () => {
             </select>
           </div>
 
-          {/* Type Filter */}
+          {/* Type Filter Checkboxes */}
           <div>
-            <label style={{ display: 'block', fontSize: 'var(--text-xs)', fontWeight: 700, color: 'var(--ink)', marginBottom: 6 }}>
+            <label style={{ display: 'block', fontSize: 'var(--text-xs)', fontWeight: 700, color: 'var(--ink)', marginBottom: 8 }}>
               Resource Type
             </label>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-              {[
-                { label: 'All Resources', val: 'ALL' },
-                { label: 'Equipment & Gear', val: 'EQUIPMENT' },
-                { label: 'Facilities & Rooms', val: 'FACILITY' },
-              ].map((t) => (
-                <label key={t.val} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 'var(--text-xs)', color: 'var(--ink-soft)', cursor: 'pointer' }}>
-                  <input
-                    type="radio"
-                    name="resource_type"
-                    checked={selectedType === t.val}
-                    onChange={() => setSelectedType(t.val)}
-                    style={{ accentColor: 'var(--persimmon-500)' }}
-                  />
-                  <span>{t.label}</span>
-                </label>
-              ))}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 'var(--text-xs)', color: 'var(--ink)', cursor: 'pointer', fontWeight: includeEquipment ? 600 : 400 }}>
+                <input
+                  type="checkbox"
+                  checked={includeEquipment}
+                  onChange={(e) => {
+                    const checked = e.target.checked;
+                    if (!checked && !includeFacility) {
+                      setIncludeFacility(true);
+                    }
+                    setIncludeEquipment(checked);
+                  }}
+                  style={{
+                    width: 16,
+                    height: 16,
+                    accentColor: 'var(--persimmon-500)',
+                    cursor: 'pointer',
+                    borderRadius: 4,
+                  }}
+                />
+                <span>Equipment & Gear</span>
+              </label>
+
+              <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 'var(--text-xs)', color: 'var(--ink)', cursor: 'pointer', fontWeight: includeFacility ? 600 : 400 }}>
+                <input
+                  type="checkbox"
+                  checked={includeFacility}
+                  onChange={(e) => {
+                    const checked = e.target.checked;
+                    if (!checked && !includeEquipment) {
+                      setIncludeEquipment(true);
+                    }
+                    setIncludeFacility(checked);
+                  }}
+                  style={{
+                    width: 16,
+                    height: 16,
+                    accentColor: 'var(--persimmon-500)',
+                    cursor: 'pointer',
+                    borderRadius: 4,
+                  }}
+                />
+                <span>Facilities & Rooms</span>
+              </label>
             </div>
           </div>
 
