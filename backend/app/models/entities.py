@@ -383,6 +383,10 @@ class BookingCondition(Base):
     booking = relationship("Booking", back_populates="conditions")
     inspector = relationship("Profile", foreign_keys=[recorded_by])
 
+    @property
+    def recorded_by_name(self) -> Optional[str]:
+        return self.inspector.full_name if self.inspector else None
+
 
 # -------------------------------------------------------------
 # 12. WAITING LIST

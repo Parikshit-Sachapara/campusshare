@@ -104,6 +104,8 @@ export const MyBookingsPage: React.FC = () => {
       });
       setDrawerOpen(false);
       queryClient.invalidateQueries({ queryKey: ['my-bookings'] });
+      queryClient.invalidateQueries({ queryKey: ['booking-timeline'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-all-bookings'] });
     },
     onError: (err: unknown) => {
       addToast({

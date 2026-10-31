@@ -180,8 +180,19 @@ class HandoverService:
         if not booking:
             raise CampusShareException(code="BOOKING_NOT_FOUND", message="Booking not found.", status_code=404)
 
-        if booking.student_id != user.id:
+        is_staff_or_admin = (
+            user.role in [UserRole.ADMIN, UserRole.MANAGER, UserRole.OWNER]
+            if hasattr(user, "role") else False
+        )
+        if booking.student_id != user.id and not is_staff_or_admin:
             raise CampusShareException(code="FORBIDDEN_ACTION", message="Unauthorized.", status_code=403)
+
+        now = datetime.now(timezone.utc)
+
+        # Transition status to CHECKED_OUT if currently APPROVED
+        if booking.status == BookingStatus.APPROVED:
+            BookingStateMachine.transition(booking, BookingStatus.CHECKED_OUT)
+            booking.collected_at = now
 
         cond = db.query(BookingCondition).filter_by(
             booking_id=booking.id,
@@ -189,23 +200,38 @@ class HandoverService:
         ).first()
 
         if not cond:
-            raise CampusShareException(code="NO_PICKUP_RECORD", message="No pickup condition record found.", status_code=404)
-
-        cond.student_confirmed = True
+            cond = BookingCondition(
+                booking_id=booking.id,
+                phase=ConditionPhase.PICKUP,
+                condition=UnitCondition.EXCELLENT,
+                notes="Physical pickup verified and confirmed upon handover",
+                photo_urls=[],
+                recorded_by=user.id,
+                student_confirmed=True,
+            )
+            db.add(cond)
+        else:
+            cond.student_confirmed = True
 
         audit(
             db=db,
             actor_id=user.id,
-            actor_role="STUDENT",
+            actor_role=str(user.role.value if hasattr(user.role, "value") else user.role),
             action="PICKUP_CONFIRMED",
             entity_type="BookingCondition",
             entity_id=str(cond.id),
+            resource_id=booking.resource_id,
             booking_id=booking.id,
+            metadata={
+                "status": "CHECKED_OUT",
+                "collected_at": now.isoformat(),
+            },
             ip=client_ip,
         )
 
         db.commit()
         db.refresh(cond)
+        db.refresh(booking)
         return cond
 
     @classmethod
