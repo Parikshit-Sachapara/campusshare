@@ -9,6 +9,16 @@ import {
   Info,
   Calendar,
   AlertTriangle,
+  Copy,
+  Check,
+  Palette,
+  Type,
+  Ticket,
+  LayoutGrid,
+  Sliders,
+  CheckCircle2,
+  Clock,
+  Layers,
 } from 'lucide-react';
 import {
   Button,
@@ -29,11 +39,9 @@ import {
   StatCard,
   EmptyState,
   Skeleton,
-  CardSkeleton,
   useToast,
   Timeline,
   DataTable,
-  FileUpload,
   Avatar,
   Badge,
   ProgressBar,
@@ -45,38 +53,44 @@ import {
 
 export const StyleguidePage: React.FC = () => {
   const toast = useToast();
+  const [activeTab, setActiveTab] = useState<'tokens' | 'typography' | 'passes' | 'components' | 'controls'>('tokens');
+  const [copiedHex, setCopiedHex] = useState<string | null>(null);
 
-  // Component States
-  const [activeTab, setActiveTab] = useState('all');
+  // Modal / Drawer demo states
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
   const [selectedSlotId, setSelectedSlotId] = useState<string | null>('slot-2');
-  const [textareaVal, setTextareaVal] = useState('Research project on autonomous swarm robotics.');
+  const [textareaVal, setTextareaVal] = useState('Senior Capstone Project: Autonomous multi-agent drone system.');
+
+  const copyToClipboard = (hex: string, label: string) => {
+    navigator.clipboard?.writeText(hex);
+    setCopiedHex(hex);
+    toast.success(`Copied ${label} (${hex}) to clipboard!`);
+    setTimeout(() => setCopiedHex(null), 2000);
+  };
+
+  const corePalette = [
+    { label: 'Oat Canvas (50)', hex: '#FBF9F4', token: '--oat-50', text: '#262422' },
+    { label: 'Oat Surface (100)', hex: '#F3EFE6', token: '--oat-100', text: '#262422' },
+    { label: 'Oat Border (200)', hex: '#E5DEC9', token: '--oat-200', text: '#262422' },
+    { label: 'Ink Dark (900)', hex: '#262422', token: '--ink', text: '#FAF7F0' },
+    { label: 'Ink Soft (600)', hex: '#5E5A53', token: '--ink-soft', text: '#FAF7F0' },
+    { label: 'Persimmon Primary', hex: '#DD4E25', token: '--persimmon-500', text: '#FFFFFF' },
+    { label: 'Persimmon Dark', hex: '#BF3C16', token: '--persimmon-600', text: '#FFFFFF' },
+    { label: 'Fern Green', hex: '#3B7A57', token: '--fern-500', text: '#FFFFFF' },
+    { label: 'Fern Forest', hex: '#2B583E', token: '--fern-600', text: '#FFFFFF' },
+    { label: 'Mulberry Plum', hex: '#7C3048', token: '--mulberry-500', text: '#FFFFFF' },
+    { label: 'Lilac Institutional', hex: '#8F85D8', token: '--lilac-500', text: '#FFFFFF' },
+    { label: 'Apricot Alert', hex: '#E07A5F', token: '--apricot-500', text: '#FFFFFF' },
+  ];
 
   const demoSlots: TimeSlot[] = [
-    { id: 'slot-1', startTime: '09:00', endTime: '10:30', available: true },
-    { id: 'slot-2', startTime: '10:30', endTime: '12:00', available: true },
-    { id: 'slot-3', startTime: '13:00', endTime: '14:30', available: false, statusLabel: 'Reserved' },
-    { id: 'slot-4', startTime: '14:30', endTime: '16:00', available: true },
-    { id: 'slot-5', startTime: '16:00', endTime: '17:30', available: false, statusLabel: 'Maintenance' },
-  ];
-
-  const demoTimeline = [
-    { id: 'e-1', timestamp: 'Oct 30, 09:15 AM', title: 'Request Submitted', actor: 'Aarav Sharma (Student)', variant: 'persimmon' as const, description: 'Requested 3.5h GPU cluster block for neural network training.' },
-    { id: 'e-2', timestamp: 'Oct 30, 10:00 AM', title: 'Priority Verified', actor: 'System Algorithm', variant: 'fern' as const, description: 'Score computed: 94/100 (Tier 1 Priority).' },
-    { id: 'e-3', timestamp: 'Oct 30, 10:45 AM', title: 'Booking Approved', actor: 'Prof. Maya Sen (Owner)', variant: 'fern' as const, description: 'Granted access pass #CS-8921-A.' },
-    { id: 'e-4', timestamp: 'Oct 30, 02:00 PM', title: 'Handover Executed', actor: 'Vikram Joshi (Manager)', variant: 'mulberry' as const, description: 'QR verification token validated at Turing Desk B.' },
-  ];
-
-  const demoTableData = [
-    { id: 'RES-01', title: 'Keysight 4-Ch Digital Oscilloscope', category: 'Electronics', dept: 'EE Lab', qty: '4/4', status: 'AVAILABLE' },
-    { id: 'RES-02', title: 'Sony FX3 Cinema Line Camera Kit', category: 'Photography', dept: 'Media Arts', qty: '1/2', status: 'AVAILABLE' },
-    { id: 'RES-03', title: 'NVIDIA RTX 4090 Workstation 04', category: 'Computing', dept: 'AI Lab', qty: '0/3', status: 'WAITLIST' },
-    { id: 'RES-04', title: 'Formlabs Form 3+ SLA Printer', category: 'Manufacturing', dept: 'Makerspace', qty: '2/2', status: 'AVAILABLE' },
-    { id: 'RES-05', title: 'Universal Robotics UR5e Robotic Arm', category: 'Robotics', dept: 'Robotics Lab', qty: '1/1', status: 'AVAILABLE' },
-    { id: 'RES-06', title: 'Thermo Fisher Scientific Centrifuge', category: 'Laboratories', dept: 'Bio Eng', qty: '3/3', status: 'AVAILABLE' },
+    { id: 'slot-1', startTime: '09:00', endTime: '10:00', available: true },
+    { id: 'slot-2', startTime: '10:00', endTime: '11:00', available: true },
+    { id: 'slot-3', startTime: '11:00', endTime: '12:00', available: false, statusLabel: 'Reserved' },
+    { id: 'slot-4', startTime: '12:00', endTime: '13:00', available: true },
+    { id: 'slot-5', startTime: '13:00', endTime: '14:00', available: false, statusLabel: 'Maintenance' },
   ];
 
   const allStatuses: BookingStatus[] = [
@@ -105,461 +119,562 @@ export const StyleguidePage: React.FC = () => {
   ];
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-10)', paddingBottom: 'var(--space-16)' }}>
-      {/* Title */}
-      <div>
-        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 11, fontFamily: 'var(--font-mono)', padding: '3px 8px', borderRadius: 'var(--radius-sm)', backgroundColor: 'var(--lilac-100)', color: 'var(--lilac-500)', marginBottom: 8, border: '1px solid var(--lilac-400)' }}>
-          <Sparkles size={13} />
-          Internal Design System & Living Component Library
-        </div>
-        <h1>CampusShare <span className="squiggle-word">Design</span> System</h1>
-        <p style={{ marginTop: 6 }}>
-          Handcrafted, warm, and distinctive tokens and components built for the 48-hour National Hackathon.
-        </p>
-      </div>
-
-      {/* 1. Color Palette Tokens */}
-      <section style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
-        <h2>1. Color Tokens & Heatmap Scale</h2>
-        <p>No generic SaaS blues or cold purples. Tailored Oat Canvas with Deep Forest Ink and warm earthy accents.</p>
-
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 'var(--space-3)' }}>
-          {[
-            { name: '--oat-50', hex: '#FBF7EF', label: 'Canvas Oat' },
-            { name: '--oat-100', hex: '#F4EDE0', label: 'Sidebar Oat' },
-            { name: '--oat-200', hex: '#E8DDC9', label: 'Border Oat' },
-            { name: '--milk', hex: '#FFFDF8', label: 'Milk Surface' },
-            { name: '--ink', hex: '#1D2B25', label: 'Forest Ink', textLight: true },
-            { name: '--persimmon-500', hex: '#E4572E', label: 'Persimmon (Student)', textLight: true },
-            { name: '--fern-500', hex: '#3F8F5B', label: 'Fern (Owner)', textLight: true },
-            { name: '--mulberry-500', hex: '#7B2D5B', label: 'Mulberry (Manager)', textLight: true },
-            { name: '--lilac-400', hex: '#A48BE0', label: 'Lilac (Admin)', textLight: true },
-            { name: '--apricot-500', hex: '#F08A3C', label: 'Apricot (Warning)', textLight: true },
-            { name: '--cherry-500', hex: '#C22B4B', label: 'Cherry (Danger)', textLight: true },
-            { name: '--sage-300', hex: '#B9D3A8', label: 'Sage (Heat 0-25%)' },
-          ].map((c) => (
-            <div
-              key={c.name}
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-6)', maxWidth: 1120, margin: '0 auto' }}>
+      {/* Header Banner */}
+      <div
+        style={{
+          backgroundColor: 'var(--milk)',
+          border: '1.5px solid var(--ink-border)',
+          borderRadius: 'var(--radius-card)',
+          padding: 'var(--space-5) var(--space-6)',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: 'var(--space-4)',
+        }}
+      >
+        <div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+            <span
               style={{
-                backgroundColor: c.hex,
-                color: c.textLight ? '#FFFDF8' : '#1D2B25',
-                padding: 'var(--space-4)',
-                borderRadius: 'var(--radius-md)',
-                border: '1.5px solid var(--ink)',
-                boxShadow: '2px 2px 0 var(--ink)',
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'space-between',
-                minHeight: '80px',
+                fontFamily: 'var(--font-mono)',
+                fontSize: 'var(--text-xs)',
+                color: 'var(--persimmon-600)',
+                backgroundColor: 'var(--persimmon-100)',
+                padding: '2px 8px',
+                borderRadius: 'var(--radius-sm)',
+                fontWeight: 700,
+                letterSpacing: '0.05em',
               }}
             >
-              <span style={{ fontWeight: 700, fontSize: 13 }}>{c.label}</span>
-              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, opacity: 0.85 }}>{c.hex}</span>
-            </div>
-          ))}
-        </div>
-
-        {/* Heatmap Demonstration */}
-        <div style={{ marginTop: 'var(--space-3)' }}>
-          <h4 style={{ marginBottom: 8 }}>Utilization Heatmap Scale:</h4>
-          <div style={{ display: 'flex', height: 26, borderRadius: 'var(--radius-md)', overflow: 'hidden', border: '1.5px solid var(--ink)' }}>
-            <div style={{ flex: 1, backgroundColor: 'var(--sage-300)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontFamily: 'var(--font-mono)' }}>0-25%</div>
-            <div style={{ flex: 1, backgroundColor: 'var(--fern-500)', color: '#FFF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontFamily: 'var(--font-mono)' }}>25-50%</div>
-            <div style={{ flex: 1, backgroundColor: 'var(--apricot-500)', color: '#FFF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontFamily: 'var(--font-mono)' }}>50-75%</div>
-            <div style={{ flex: 1, backgroundColor: 'var(--persimmon-500)', color: '#FFF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontFamily: 'var(--font-mono)' }}>75-90%</div>
-            <div style={{ flex: 1, backgroundColor: 'var(--mulberry-500)', color: '#FFF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontFamily: 'var(--font-mono)' }}>90-100%+</div>
+              DESIGN SYSTEM SPECIFICATION
+            </span>
+            <Badge variant="oat">v2.4 Editorial</Badge>
           </div>
-        </div>
-      </section>
-
-      {/* 2. Signature Visual Components */}
-      <section style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
-        <h2>2. Signature Component: Booking Pass (Boarding Pass)</h2>
-        <p>Rendered with perforated dashed divider, notched circular cutouts, status stamp, and QR stub.</p>
-
-        <div style={{ maxWidth: 740 }}>
-          <BookingPass
-            bookingId="CS-9042-B"
-            resourceTitle="Universal Robotics UR5e Robotic Arm"
-            category="Robotics"
-            borrowerName="Aarav Sharma"
-            borrowerRole="Student"
-            department="Robotics Lab"
-            dateStr="Friday, Nov 01"
-            timeSlot="10:30 – 14:00"
-            location="Mechatronics Building Station 02"
-            status="APPROVED"
-            verificationCode="PASS-8941"
-          />
-        </div>
-      </section>
-
-      {/* 3. Status Stamps */}
-      <section style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
-        <h2>3. Status Stamps (Rotated -4° Stamped Ink)</h2>
-        <p>No generic pill badges. Stamped into the oat canvas with a signature "thud" mount animation.</p>
-
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--space-4)', padding: 'var(--space-4)', backgroundColor: 'var(--milk)', border: 'var(--card-border)', borderRadius: 'var(--radius-card)' }}>
-          {allStatuses.map((st) => (
-            <div key={st} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
-              <StatusStamp status={st} />
-              <span style={{ fontSize: 10, fontFamily: 'var(--font-mono)', color: 'var(--ink-mute)' }}>{st}</span>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* 4. Handcrafted Category SVGs & Resource Cards */}
-      <section style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
-        <h2>4. Resource Cards with Hand-Drawn Category Tabs</h2>
-        <p>Custom SVG icons for all 9 campus disciplines with stock units and soft-ink hover lift.</p>
-
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 'var(--space-4)' }}>
-          <ResourceCard
-            id="res-1"
-            title="Sony FX3 Cinema Line Camera Kit"
-            category="Photography"
-            department="Media Arts Center"
-            location="Studio A, 2nd Fl"
-            availableQty={2}
-            totalQty={3}
-            maxDurationHours={6}
-            description="Full-frame cinema camera with 24-70mm GM II lens, XLR handle unit, and wireless mic kit."
-            onRequest={(id) => toast.info(`Request modal opened for ${id}`)}
-          />
-
-          <ResourceCard
-            id="res-2"
-            title="Keysight 4-Ch Digital Oscilloscope"
-            category="Electronics"
-            department="Electrical & Computer Eng"
-            location="Bench 07, Faraday Lab"
-            availableQty={4}
-            totalQty={4}
-            maxDurationHours={3}
-            description="1 GHz bandwidth, 5 GSa/s sample rate, with differential probes and logic analyzer pod."
-            onRequest={(id) => toast.info(`Request modal opened for ${id}`)}
-          />
-
-          <ResourceCard
-            id="res-3"
-            title="NVIDIA RTX 4090 Workstation 04"
-            category="Computing"
-            department="AI Research Group"
-            location="Turing Hall Rm 302"
-            availableQty={0}
-            totalQty={3}
-            maxDurationHours={8}
-            requiresTraining={true}
-            trainingName="HPC Cluster Safety"
-            description="24GB VRAM, dual Xeon processors, PyTorch & CUDA 12 environment pre-configured."
-            onRequest={(id) => toast.warning(`Joined waitlist for ${id}`)}
-          />
+          <h1 style={{ margin: 0, fontSize: 'var(--text-3xl)', color: 'var(--ink)' }}>
+            CampusShare <span className="squiggle-word">Design Tokens</span> & Spec
+          </h1>
+          <p style={{ margin: '6px 0 0', color: 'var(--ink-soft)', fontSize: 'var(--text-sm)', maxWidth: 640 }}>
+            Curated visual foundation: Warm Oat (#FBF9F4) canvas, tactile pressed ink, Fraunces editorial serif typography, perforated boarding passes, and stamped status marks.
+          </p>
         </div>
 
-        {/* Category Icons Row */}
-        <div style={{ marginTop: 'var(--space-3)' }}>
-          <h4 style={{ marginBottom: 8 }}>Hand-Drawn Category SVGs:</h4>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--space-3)' }}>
-            {allCategories.map((cat) => (
-              <div
-                key={cat}
+        {/* Tab Switcher */}
+        <div
+          style={{
+            display: 'flex',
+            backgroundColor: 'var(--oat-100)',
+            padding: 4,
+            borderRadius: 'var(--radius-full)',
+            border: '1.5px solid var(--ink-border)',
+            gap: 4,
+            flexWrap: 'wrap',
+          }}
+        >
+          {[
+            { id: 'tokens', label: 'Color Tokens', icon: <Palette size={14} /> },
+            { id: 'typography', label: 'Typography', icon: <Type size={14} /> },
+            { id: 'passes', label: 'Passes & Stamps', icon: <Ticket size={14} /> },
+            { id: 'components', label: 'Components', icon: <LayoutGrid size={14} /> },
+            { id: 'controls', label: 'Interactive Controls', icon: <Sliders size={14} /> },
+          ].map((t) => {
+            const active = activeTab === t.id;
+            return (
+              <button
+                key={t.id}
+                type="button"
+                onClick={() => setActiveTab(t.id as any)}
                 style={{
-                  display: 'flex',
+                  display: 'inline-flex',
                   alignItems: 'center',
-                  gap: 8,
-                  padding: '6px 12px',
-                  backgroundColor: 'var(--milk)',
-                  border: '1.5px solid var(--oat-200)',
-                  borderRadius: 'var(--radius-md)',
-                  fontSize: 12,
+                  gap: 6,
+                  padding: '6px 14px',
+                  borderRadius: 'var(--radius-full)',
+                  border: active ? '1.5px solid var(--ink-border)' : '1.5px solid transparent',
+                  backgroundColor: active ? 'var(--milk)' : 'transparent',
+                  color: active ? 'var(--ink)' : 'var(--ink-soft)',
+                  fontWeight: active ? 700 : 500,
+                  fontSize: 'var(--text-xs)',
+                  cursor: 'pointer',
+                  boxShadow: active ? '0 1px 3px rgba(0,0,0,0.06)' : 'none',
+                  transition: 'all 0.15s ease',
                 }}
               >
-                <CategoryIcon category={cat} size={18} strokeColor="var(--persimmon-500)" />
-                <span>{cat}</span>
-              </div>
-            ))}
+                {t.icon}
+                <span>{t.label}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* TAB 1: COLOR TOKENS */}
+      {activeTab === 'tokens' && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-5)' }}>
+          <div
+            style={{
+              backgroundColor: 'var(--milk)',
+              border: '1.5px solid var(--ink-border)',
+              borderRadius: 'var(--radius-card)',
+              padding: 'var(--space-5)',
+            }}
+          >
+            <h3 style={{ margin: '0 0 var(--space-2)', fontSize: 'var(--text-lg)', color: 'var(--ink)' }}>
+              Brand Color Tokens (Click to Copy HEX)
+            </h3>
+            <p style={{ margin: '0 0 var(--space-4)', color: 'var(--ink-soft)', fontSize: 'var(--text-xs)' }}>
+              Warm canvas Oat replaces cold gray. Strict rule: Zero generic blue, zero pure #000 black, zero yellow gold.
+            </p>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 'var(--space-3)' }}>
+              {corePalette.map((c) => {
+                const isCopied = copiedHex === c.hex;
+                return (
+                  <div
+                    key={c.token}
+                    onClick={() => copyToClipboard(c.hex, c.label)}
+                    style={{
+                      backgroundColor: c.hex,
+                      color: c.text,
+                      borderRadius: 'var(--radius-md)',
+                      border: '1.5px solid var(--ink-border)',
+                      padding: 'var(--space-3) var(--space-4)',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      justifyContent: 'space-between',
+                      minHeight: 88,
+                      cursor: 'pointer',
+                      transition: 'transform 0.15s ease, box-shadow 0.15s ease',
+                    }}
+                    onMouseEnter={(e) => (e.currentTarget.style.transform = 'translateY(-2px)')}
+                    onMouseLeave={(e) => (e.currentTarget.style.transform = 'translateY(0)')}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ fontWeight: 700, fontSize: 13 }}>{c.label}</span>
+                      {isCopied ? <Check size={14} /> : <Copy size={13} style={{ opacity: 0.6 }} />}
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', fontSize: 11, fontFamily: 'var(--font-mono)' }}>
+                      <span>{c.hex}</span>
+                      <span style={{ opacity: 0.75 }}>{c.token}</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Utilization Heatmap Gradient */}
+          <div
+            style={{
+              backgroundColor: 'var(--milk)',
+              border: '1.5px solid var(--ink-border)',
+              borderRadius: 'var(--radius-card)',
+              padding: 'var(--space-5)',
+            }}
+          >
+            <h3 style={{ margin: '0 0 var(--space-2)', fontSize: 'var(--text-lg)', color: 'var(--ink)' }}>
+              Campus Pulse Heat-Tinted Telemetry Scale
+            </h3>
+            <p style={{ margin: '0 0 var(--space-3)', color: 'var(--ink-soft)', fontSize: 'var(--text-xs)' }}>
+              Real-time resource and spatial floor plan occupancy mapping from idle green to full load mulberry.
+            </p>
+            <div style={{ display: 'flex', height: 36, borderRadius: 'var(--radius-md)', overflow: 'hidden', border: '1.5px solid var(--ink-border)' }}>
+              <div style={{ flex: 1, backgroundColor: 'var(--sage-300)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, color: 'var(--ink)' }}>0-25% Idle</div>
+              <div style={{ flex: 1, backgroundColor: 'var(--fern-500)', color: '#FFF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700 }}>25-50% Light</div>
+              <div style={{ flex: 1, backgroundColor: 'var(--apricot-500)', color: '#FFF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700 }}>50-75% Moderate</div>
+              <div style={{ flex: 1, backgroundColor: 'var(--persimmon-500)', color: '#FFF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700 }}>75-90% Peak</div>
+              <div style={{ flex: 1, backgroundColor: 'var(--mulberry-500)', color: '#FFF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700 }}>90-100% Full</div>
+            </div>
           </div>
         </div>
-      </section>
+      )}
 
-      {/* 5. StatCard & Editorial Numbers */}
-      <section style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
-        <h2>5. Stat Cards (Fraunces Editorial Numbers + Sparklines)</h2>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 'var(--space-4)' }}>
-          <StatCard
-            label="Active Bookings"
-            value="42"
-            delta="+8.4%"
-            trend="up"
-            sparklineData={[20, 24, 28, 32, 38, 42]}
-            note="Across 7 facilities"
-          />
-          <StatCard
-            label="Utilization Rate"
-            value="84.6%"
-            delta="+12.1%"
-            trend="up"
-            sparklineData={[60, 65, 72, 78, 80, 84.6]}
-            note="Platform target: >80%"
-          />
-          <StatCard
-            label="Overdue Alerts"
-            value="0"
-            delta="0%"
-            trend="neutral"
-            sparklineData={[2, 1, 1, 0, 0, 0]}
-            note="Zero active violations"
-          />
-        </div>
-      </section>
+      {/* TAB 2: TYPOGRAPHY */}
+      {activeTab === 'typography' && (
+        <div
+          style={{
+            backgroundColor: 'var(--milk)',
+            border: '1.5px solid var(--ink-border)',
+            borderRadius: 'var(--radius-card)',
+            padding: 'var(--space-6)',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 'var(--space-5)',
+          }}
+        >
+          <div>
+            <h3 style={{ margin: '0 0 var(--space-2)', fontSize: 'var(--text-lg)', color: 'var(--ink)' }}>
+              Editorial Type Hierarchy
+            </h3>
+            <p style={{ margin: '0 0 var(--space-4)', color: 'var(--ink-soft)', fontSize: 'var(--text-xs)' }}>
+              Fraunces serif display for institutional warmth paired with Outfit for interface precision and JetBrains Mono for cryptographic telemetry.
+            </p>
+          </div>
 
-      {/* 6. Fair Access Breakdown */}
-      <section style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
-        <h2>6. Priority Score Breakdown (Stacked N/D/E/A Bar)</h2>
-        <div style={{ maxWidth: 640, backgroundColor: 'var(--milk)', padding: 'var(--space-5)', borderRadius: 'var(--radius-card)', border: 'var(--card-border)', boxShadow: 'var(--card-shadow)' }}>
-          <PriorityScoreBreakdown
-            need={35}
-            disadvantage={25}
-            efficiency={20}
-            accountability={15}
-            maxScore={100}
-          />
-        </div>
-      </section>
+          <div style={{ borderBottom: '1px solid var(--ink-border)', paddingBottom: 'var(--space-4)' }}>
+            <div style={{ fontSize: 12, fontFamily: 'var(--font-mono)', color: 'var(--ink-mute)', marginBottom: 4 }}>Display 1 &bull; Fraunces 700 (36px)</div>
+            <h1 style={{ margin: 0, fontSize: 36, color: 'var(--ink)', fontFamily: 'var(--font-display)' }}>
+              Decentralized <span className="squiggle-word">Equipment Commons</span> for Modern Campus
+            </h1>
+          </div>
 
-      {/* 7. Buttons & Form Components */}
-      <section style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
-        <h2>7. Buttons, Forms & Pickers</h2>
+          <div style={{ borderBottom: '1px solid var(--ink-border)', paddingBottom: 'var(--space-4)' }}>
+            <div style={{ fontSize: 12, fontFamily: 'var(--font-mono)', color: 'var(--ink-mute)', marginBottom: 4 }}>Section Heading &bull; Fraunces 600 (24px)</div>
+            <h2 style={{ margin: 0, fontSize: 24, color: 'var(--ink)', fontFamily: 'var(--font-display)' }}>
+              Fairness-Weighted Allocation & Telemetry
+            </h2>
+          </div>
 
-        {/* Buttons */}
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--space-3)', alignItems: 'center' }}>
-          <Button variant="primary" size="md">Primary Action</Button>
-          <Button variant="secondary" size="md">Secondary Outlined</Button>
-          <Button variant="ghost" size="md">Ghost Link</Button>
-          <Button variant="danger" size="md">Destructive</Button>
-          <Button variant="primary" size="md" isLoading>Loading State</Button>
-          <Button variant="primary" size="sm">Small</Button>
-          <Button variant="primary" size="lg">Large CTA</Button>
-        </div>
-
-        {/* Form Controls */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 'var(--space-4)', marginTop: 'var(--space-2)' }}>
-          <Input
-            label="Resource Search / Query"
-            placeholder="e.g. Oscilloscope or 4090"
-            leftIcon={<Search size={16} />}
-            hint="Type keywords or equipment serial"
-          />
-
-          <Input
-            label="Borrower College Email"
-            placeholder="student@campus.edu"
-            leftIcon={<Mail size={16} />}
-            error="Only institutional (.edu) email addresses are permitted"
-          />
-
-          <Select
-            label="Target Campus Department"
-            placeholder="Select academic department"
-            options={[
-              { value: 'eng', label: 'Faculty of Engineering' },
-              { value: 'sci', label: 'Faculty of Sciences' },
-              { value: 'arts', label: 'Media & Digital Arts' },
-              { value: 'med', label: 'Biomedical Labs' },
-            ]}
-          />
-
-          <Textarea
-            label="Project Description & Justification"
-            value={textareaVal}
-            onChange={(e) => setTextareaVal(e.target.value)}
-            maxLength={180}
-            showCount
-            hint="Evaluated by the equity algorithm"
-          />
-        </div>
-
-        {/* Date and Time Slot Picker */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 'var(--space-4)', marginTop: 'var(--space-2)' }}>
-          <DatePicker
-            label="1. Select Reservation Date"
-            selectedDate={selectedDate}
-            onSelectDate={(d) => {
-              setSelectedDate(d);
-              toast.info(`Selected date: ${d.toLocaleDateString()}`);
-            }}
-          />
+          <div style={{ borderBottom: '1px solid var(--ink-border)', paddingBottom: 'var(--space-4)' }}>
+            <div style={{ fontSize: 12, fontFamily: 'var(--font-mono)', color: 'var(--ink-mute)', marginBottom: 4 }}>Body Text &bull; Outfit 400 (15px)</div>
+            <p style={{ margin: 0, fontSize: 15, color: 'var(--ink-soft)', lineHeight: 1.6 }}>
+              CampusShare enforces zero double-bookings with transactional row locks and immutable audit event logging. When equipment is returned, condition verification photos and inspection notes are cryptographically linked to preserve historical custody.
+            </p>
+          </div>
 
           <div>
+            <div style={{ fontSize: 12, fontFamily: 'var(--font-mono)', color: 'var(--ink-mute)', marginBottom: 4 }}>Monospace Metric & Code &bull; JetBrains Mono (13px)</div>
+            <code style={{ fontFamily: 'var(--font-mono)', fontSize: 13, backgroundColor: 'var(--oat-100)', padding: '6px 12px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--ink-border)' }}>
+              PASS#CS-2026-F981C &bull; PRIORITY: 96/100 (TIER-1) &bull; SHA256: 4f12...e8a9
+            </code>
+          </div>
+        </div>
+      )}
+
+      {/* TAB 3: PASSES & STAMPS */}
+      {activeTab === 'passes' && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-5)' }}>
+          {/* Status Stamps */}
+          <div
+            style={{
+              backgroundColor: 'var(--milk)',
+              border: '1.5px solid var(--ink-border)',
+              borderRadius: 'var(--radius-card)',
+              padding: 'var(--space-5)',
+            }}
+          >
+            <h3 style={{ margin: '0 0 var(--space-2)', fontSize: 'var(--text-lg)', color: 'var(--ink)' }}>
+              Official Status Stamps (-4° Rotated Ink)
+            </h3>
+            <p style={{ margin: '0 0 var(--space-4)', color: 'var(--ink-soft)', fontSize: 'var(--text-xs)' }}>
+              Tactile physical impression stamps designed to simulate genuine university registrar ink seals.
+            </p>
+
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--space-4)' }}>
+              {allStatuses.map((st) => (
+                <div key={st} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
+                  <StatusStamp status={st} />
+                  <span style={{ fontSize: 10, fontFamily: 'var(--font-mono)', color: 'var(--ink-mute)' }}>{st}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Boarding Pass Preview */}
+          <div
+            style={{
+              backgroundColor: 'var(--milk)',
+              border: '1.5px solid var(--ink-border)',
+              borderRadius: 'var(--radius-card)',
+              padding: 'var(--space-5)',
+            }}
+          >
+            <h3 style={{ margin: '0 0 var(--space-2)', fontSize: 'var(--text-lg)', color: 'var(--ink)' }}>
+              Signature Digital Boarding Pass
+            </h3>
+            <p style={{ margin: '0 0 var(--space-4)', color: 'var(--ink-soft)', fontSize: 'var(--text-xs)' }}>
+              Perforated split ticket with verification QR, custodial location, student credentials, and physical handover status.
+            </p>
+
+            <div style={{ maxWidth: 740 }}>
+              <BookingPass
+                bookingId="CS-2026-8941B"
+                resourceTitle="Sony FX3 Cinema Line Camera Kit"
+                category="Photography"
+                borrowerName="Aarav Mehta"
+                borrowerRole="Student"
+                department="Media Arts Center"
+                dateStr="Saturday, Nov 01, 2026"
+                timeSlot="10:00 – 14:00"
+                location="Media Arts Desk B &bull; Custodian: Maya Sen"
+                status="APPROVED"
+                verificationCode="PASS-8941"
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* TAB 4: COMPONENTS */}
+      {activeTab === 'components' && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-5)' }}>
+          {/* Category SVGs */}
+          <div
+            style={{
+              backgroundColor: 'var(--milk)',
+              border: '1.5px solid var(--ink-border)',
+              borderRadius: 'var(--radius-card)',
+              padding: 'var(--space-5)',
+            }}
+          >
+            <h3 style={{ margin: '0 0 var(--space-2)', fontSize: 'var(--text-lg)', color: 'var(--ink)' }}>
+              Hand-Drawn Category Icons
+            </h3>
+            <p style={{ margin: '0 0 var(--space-4)', color: 'var(--ink-soft)', fontSize: 'var(--text-xs)' }}>
+              Custom stroke iconography for all 9 campus faculties and equipment categories.
+            </p>
+
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--space-3)' }}>
+              {allCategories.map((cat) => (
+                <div
+                  key={cat}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 8,
+                    padding: '8px 14px',
+                    borderRadius: 'var(--radius-md)',
+                    border: '1.5px solid var(--ink-border)',
+                    backgroundColor: 'var(--oat-50)',
+                    fontSize: 'var(--text-xs)',
+                    fontWeight: 600,
+                    color: 'var(--ink)',
+                  }}
+                >
+                  <CategoryIcon category={cat} size={18} />
+                  <span>{cat}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Resource Cards Grid */}
+          <div
+            style={{
+              backgroundColor: 'var(--milk)',
+              border: '1.5px solid var(--ink-border)',
+              borderRadius: 'var(--radius-card)',
+              padding: 'var(--space-5)',
+            }}
+          >
+            <h3 style={{ margin: '0 0 var(--space-2)', fontSize: 'var(--text-lg)', color: 'var(--ink)' }}>
+              Resource Cards with Hand-Crafted Category Badges
+            </h3>
+            <p style={{ margin: '0 0 var(--space-4)', color: 'var(--ink-soft)', fontSize: 'var(--text-xs)' }}>
+              Dynamic stock units counter, custodian badge, hover lift, and direct reservation triggers.
+            </p>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 'var(--space-4)' }}>
+              <ResourceCard
+                id="res-demo-1"
+                title="Keysight 4-Ch Digital Oscilloscope"
+                category="Electronics"
+                department="Electrical & Computer Eng"
+                location="Bench 07, Faraday Lab"
+                availableQty={4}
+                totalQty={4}
+                maxDurationHours={3}
+                description="1 GHz bandwidth, 5 GSa/s sample rate, with differential probes and logic analyzer pod."
+                onRequest={() => toast.info('Reservation modal opened')}
+              />
+
+              <ResourceCard
+                id="res-demo-2"
+                title="NVIDIA RTX 4090 Workstation 04"
+                category="Computing"
+                department="AI Research Lab"
+                location="Turing Hall Rm 302"
+                availableQty={0}
+                totalQty={3}
+                maxDurationHours={8}
+                description="24GB VRAM, dual Xeon processors, PyTorch & CUDA 12 environment pre-configured."
+                onRequest={() => toast.info('Waitlist join triggered')}
+              />
+            </div>
+          </div>
+
+          {/* Stat Cards with Sparklines */}
+          <div
+            style={{
+              backgroundColor: 'var(--milk)',
+              border: '1.5px solid var(--ink-border)',
+              borderRadius: 'var(--radius-card)',
+              padding: 'var(--space-5)',
+            }}
+          >
+            <h3 style={{ margin: '0 0 var(--space-2)', fontSize: 'var(--text-lg)', color: 'var(--ink)' }}>
+              Institutional Stat Cards with Sparklines
+            </h3>
+            <p style={{ margin: '0 0 var(--space-4)', color: 'var(--ink-soft)', fontSize: 'var(--text-xs)' }}>
+              Fraunces editorial metric numbers with trend arrows and SVG sparkline trajectories.
+            </p>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 'var(--space-4)' }}>
+              <StatCard
+                label="Active Campus Passes"
+                value="48"
+                delta="+14.2%"
+                trend="up"
+                sparklineData={[12, 18, 25, 34, 42, 48]}
+                note="Issued across 7 facilities"
+              />
+              <StatCard
+                label="Fleet Utilization"
+                value="88.4%"
+                delta="Peak Load"
+                trend="neutral"
+                sparklineData={[60, 72, 80, 85, 88]}
+                note="Target benchmark: 80%"
+              />
+              <StatCard
+                label="Overdue Alert Rate"
+                value="0"
+                delta="Zero Violations"
+                trend="up"
+                sparklineData={[2, 1, 0, 0, 0]}
+                note="100% on-time return rate"
+              />
+            </div>
+          </div>
+
+          {/* Priority Score Breakdown */}
+          <div
+            style={{
+              backgroundColor: 'var(--milk)',
+              border: '1.5px solid var(--ink-border)',
+              borderRadius: 'var(--radius-card)',
+              padding: 'var(--space-5)',
+            }}
+          >
+            <h3 style={{ margin: '0 0 var(--space-2)', fontSize: 'var(--text-lg)', color: 'var(--ink)' }}>
+              Algorithmic Fairness Priority Breakdown
+            </h3>
+            <p style={{ margin: '0 0 var(--space-4)', color: 'var(--ink-soft)', fontSize: 'var(--text-xs)' }}>
+              Multivariate weighted scoring formula: Need (40%) + Department Standing (20%) + Eligibility (25%) + Academic History (15%).
+            </p>
+
+            <PriorityScoreBreakdown
+              score={94}
+              need={38}
+              disadvantage={18}
+              efficiency={24}
+              accountability={14}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* TAB 5: INTERACTIVE CONTROLS */}
+      {activeTab === 'controls' && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-5)' }}>
+          <div
+            style={{
+              backgroundColor: 'var(--milk)',
+              border: '1.5px solid var(--ink-border)',
+              borderRadius: 'var(--radius-card)',
+              padding: 'var(--space-5)',
+            }}
+          >
+            <h3 style={{ margin: '0 0 var(--space-2)', fontSize: 'var(--text-lg)', color: 'var(--ink)' }}>
+              Tactile Button Variants & Overlays
+            </h3>
+            <p style={{ margin: '0 0 var(--space-4)', color: 'var(--ink-soft)', fontSize: 'var(--text-xs)' }}>
+              Primary, secondary, and destructive actions featuring slight pressed-ink depth and tactile drop shadows.
+            </p>
+
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--space-3)', alignItems: 'center' }}>
+              <Button variant="primary" onClick={() => toast.success('Primary Action Confirmed')}>
+                Primary Action
+              </Button>
+              <Button variant="secondary" onClick={() => toast.info('Secondary Clicked')}>
+                Secondary Outline
+              </Button>
+              <Button variant="danger" onClick={() => toast.error('Destructive Action')}>
+                Destructive Action
+              </Button>
+              <Button variant="primary" loading={true}>
+                Loading State
+              </Button>
+              <Button variant="secondary" onClick={() => setIsModalOpen(true)}>
+                Open Modal Preview
+              </Button>
+              <Button variant="secondary" onClick={() => setIsDrawerOpen(true)}>
+                Open Side Drawer
+              </Button>
+            </div>
+          </div>
+
+          {/* Time Slot Selector */}
+          <div
+            style={{
+              backgroundColor: 'var(--milk)',
+              border: '1.5px solid var(--ink-border)',
+              borderRadius: 'var(--radius-card)',
+              padding: 'var(--space-5)',
+            }}
+          >
+            <h3 style={{ margin: '0 0 var(--space-2)', fontSize: 'var(--text-lg)', color: 'var(--ink)' }}>
+              Interactive Slot Selector
+            </h3>
+            <p style={{ margin: '0 0 var(--space-4)', color: 'var(--ink-soft)', fontSize: 'var(--text-xs)' }}>
+              Pill slots displaying live availability status and multi-unit capacity indicators.
+            </p>
+
             <TimeSlotPicker
-              label="2. Select Booking Time Window"
               slots={demoSlots}
               selectedSlotId={selectedSlotId}
               onSelectSlot={(slot) => {
                 setSelectedSlotId(slot.id);
-                toast.success(`Selected slot: ${slot.startTime} – ${slot.endTime}`);
+                toast.info(`Selected time slot #${slot.id}`);
               }}
             />
           </div>
         </div>
-      </section>
+      )}
 
-      {/* 8. Modals, ConfirmDialog & Drawer */}
-      <section style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
-        <h2>8. Overlays: Modal, Confirm Dialog & Drawer</h2>
-        <div style={{ display: 'flex', gap: 'var(--space-3)', flexWrap: 'wrap' }}>
-          <Button variant="secondary" onClick={() => setIsModalOpen(true)}>
-            Open Standard Modal
-          </Button>
-
-          <Button variant="danger" onClick={() => setIsConfirmOpen(true)}>
-            Open Confirm Dialog
-          </Button>
-
-          <Button variant="secondary" onClick={() => setIsDrawerOpen(true)}>
-            Open Side Drawer
-          </Button>
-        </div>
-
-        {/* Standard Modal */}
-        <Modal
-          isOpen={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
-          title="Reservation Policy & Safety"
-          footer={
-            <Button variant="primary" onClick={() => setIsModalOpen(false)}>
-              I Understand
-            </Button>
-          }
-        >
-          <p>
-            Resources must be collected within 15 minutes of the slot start time. Handover requires scanning your QR boarding pass with the facility attendant.
+      {/* Modal Preview */}
+      <Modal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title="Institutional Verification Modal"
+      >
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
+          <p style={{ margin: 0, color: 'var(--ink-soft)', fontSize: 'var(--text-sm)' }}>
+            This modal demonstrates standard confirmation dialogs with Oat canvas styling, rounded radius, and accessible keyboard escape listeners.
           </p>
-        </Modal>
-
-        {/* Confirm Dialog */}
-        <ConfirmDialog
-          isOpen={isConfirmOpen}
-          onClose={() => setIsConfirmOpen(false)}
-          onConfirm={() => {
-            setIsConfirmOpen(false);
-            toast.error('Booking #CS-9042 was cancelled.');
-          }}
-          title="Cancel Reservation?"
-          description="Are you sure you want to cancel this booking? The slot will immediately be released to waitlisted researchers."
-          confirmLabel="Yes, Cancel Booking"
-          isDestructive
-        />
-
-        {/* Drawer */}
-        <Drawer
-          isOpen={isDrawerOpen}
-          onClose={() => setIsDrawerOpen(false)}
-          title="Filter Campus Inventory"
-          footer={
-            <Button variant="primary" onClick={() => setIsDrawerOpen(false)}>
-              Apply Filters
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 'var(--space-3)' }}>
+            <Button variant="secondary" onClick={() => setIsModalOpen(false)}>
+              Cancel
             </Button>
-          }
-        >
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
-            <Select
-              label="Category"
-              options={allCategories.map((c) => ({ value: c, label: c }))}
-            />
-            <Input label="Minimum Units Free" type="number" defaultValue="1" />
-            <Textarea label="Notes / Special Requirements" placeholder="e.g. Requires fume hood..." />
+            <Button
+              variant="primary"
+              onClick={() => {
+                setIsModalOpen(false);
+                toast.success('Confirmed from modal!');
+              }}
+            >
+              Confirm Action
+            </Button>
           </div>
-        </Drawer>
-      </section>
-
-      {/* 9. Timeline (Travel Itinerary Style) */}
-      <section style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
-        <h2>9. Activity Timeline (Itinerary Style with Fern Nodes)</h2>
-        <p>Vertical dotted line with rounded nodes tracking the full audit path.</p>
-
-        <div style={{ maxWidth: 600, backgroundColor: 'var(--milk)', padding: 'var(--space-6)', borderRadius: 'var(--radius-card)', border: 'var(--card-border)', boxShadow: 'var(--card-shadow)' }}>
-          <Timeline events={demoTimeline} />
         </div>
-      </section>
+      </Modal>
 
-      {/* 10. Data Table */}
-      <section style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
-        <h2>10. Sortable & Paginated Data Table</h2>
-        <DataTable
-          data={demoTableData}
-          pageSize={4}
-          columns={[
-            { key: 'id', header: 'Resource Code', sortable: true, render: (r) => <span className="mono" style={{ fontWeight: 600 }}>{r.id}</span> },
-            { key: 'title', header: 'Equipment / Space', sortable: true, render: (r) => <strong>{r.title}</strong> },
-            { key: 'category', header: 'Category', sortable: true, render: (r) => <Badge variant="oat">{r.category}</Badge> },
-            { key: 'dept', header: 'Department' },
-            { key: 'qty', header: 'Available Units' },
-            {
-              key: 'status',
-              header: 'Status',
-              render: (r) => (
-                <Badge variant={r.status === 'AVAILABLE' ? 'fern' : 'apricot'}>
-                  {r.status}
-                </Badge>
-              ),
-            },
-          ]}
-        />
-      </section>
-
-      {/* 11. File Upload (Validation & Preview) */}
-      <section style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
-        <h2>11. File Upload Component</h2>
-        <p>Client-side MIME type and size limit validation with instant thumbnail preview.</p>
-        <div style={{ maxWidth: 520 }}>
-          <FileUpload
-            label="Upload Proof of Safety Certification (PDF, PNG, JPG max 5MB)"
-            maxSizeMb={5}
-            onFilesSelected={(files) => {
-              if (files.length > 0) {
-                toast.success(`Attached ${files.length} document(s)`);
-              }
-            }}
-          />
-        </div>
-      </section>
-
-      {/* 12. Skeletons & Empty State */}
-      <section style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
-        <h2>12. Loading Skeletons & Friendly Empty State</h2>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 'var(--space-4)' }}>
-          <CardSkeleton />
-
-          <EmptyState
-            title="No Active Incidents"
-            description="Every resource currently in circulation has passed checkout verification with an intact audit seal."
-            actionLabel="Return to Catalog"
-            onAction={() => toast.info('Navigating to catalog')}
-          />
-        </div>
-      </section>
-
-      {/* 13. Toast Notification Triggers */}
-      <section style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
-        <h2>13. Toast Notification System</h2>
-        <p>Trigger instant feedback alerts anchored to bottom-right with auto-dismiss.</p>
-        <div style={{ display: 'flex', gap: 'var(--space-3)', flexWrap: 'wrap' }}>
-          <Button variant="primary" onClick={() => toast.success('Booking #CS-9042 successfully approved!')}>
-            Fire Success Toast
-          </Button>
-          <Button variant="danger" onClick={() => toast.error('Prerequisite safety certificate missing.')}>
-            Fire Error Toast
-          </Button>
-          <Button variant="secondary" onClick={() => toast.warning('Resource due for return in 30 minutes.')}>
-            Fire Warning Toast
-          </Button>
-          <Button variant="ghost" onClick={() => toast.info('New resource added to Robotics Lab inventory.')}>
-            Fire Info Toast
+      {/* Drawer Preview */}
+      <Drawer
+        isOpen={isDrawerOpen}
+        onClose={() => setIsDrawerOpen(false)}
+        title="Side Inspection Drawer"
+      >
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
+          <p style={{ margin: 0, color: 'var(--ink-soft)', fontSize: 'var(--text-sm)' }}>
+            Used for detailed booking pass inspection, timeline audit streams, and equipment handover verification.
+          </p>
+          <Button variant="primary" onClick={() => setIsDrawerOpen(false)}>
+            Close Drawer
           </Button>
         </div>
-      </section>
+      </Drawer>
     </div>
   );
 };

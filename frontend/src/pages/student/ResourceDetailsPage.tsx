@@ -66,6 +66,7 @@ export const ResourceDetailsPage: React.FC = () => {
     queryKey: ['resource', id],
     queryFn: () => api.getResource(id!),
     enabled: Boolean(id),
+    staleTime: 60000,
   });
 
   // 2. Fetch User Eligibility live evaluation
@@ -73,13 +74,15 @@ export const ResourceDetailsPage: React.FC = () => {
     queryKey: ['resource-eligibility', id],
     queryFn: () => api.checkEligibility(id!),
     enabled: Boolean(id),
+    staleTime: 60000,
   });
 
-  // 3. Fetch 30-Day Heat-Tinted Calendar
+  // 3. Fetch 30-Day Heat-Tinted Calendar (Optimized in-memory batch)
   const { data: calendarData } = useQuery({
     queryKey: ['resource-calendar', id],
     queryFn: () => api.getCalendar(id!),
     enabled: Boolean(id),
+    staleTime: 60000,
   });
 
   // 4. Fetch Slots for selected date
@@ -87,6 +90,7 @@ export const ResourceDetailsPage: React.FC = () => {
     queryKey: ['resource-availability', id, selectedDate],
     queryFn: () => api.getAvailability(id!, selectedDate),
     enabled: Boolean(id && selectedDate),
+    staleTime: 30000,
   });
 
   // 5. Fetch Similar Resources
@@ -94,6 +98,7 @@ export const ResourceDetailsPage: React.FC = () => {
     queryKey: ['similar-resources', id],
     queryFn: () => (id ? api.getSimilarResources(id, 4) : []),
     enabled: Boolean(id),
+    staleTime: 60000,
   });
 
   const [showPrintTag, setShowPrintTag] = useState<boolean>(false);

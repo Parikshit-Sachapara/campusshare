@@ -220,15 +220,19 @@ class BookingService:
             )
 
             # 5. Determine Initial Status:
-            # If approval_required is False AND not restricted AND no review flags -> auto APPROVED!
-            auto_approve = (
-                not resource.approval_required
-                and not resource.is_restricted
-                and not eligibility.flagged_for_review
-            )
-
-            initial_status = BookingStatus.APPROVED if auto_approve else BookingStatus.PENDING
-            approved_at = now if auto_approve else None
+            # Student bookings are submitted for administrator & staff approval triage.
+            # Owners/Admins/Managers booking directly may be auto-approved if no approval required.
+            if user.role == UserRole.STUDENT:
+                initial_status = BookingStatus.PENDING
+                approved_at = None
+            else:
+                auto_approve = (
+                    not resource.approval_required
+                    and not resource.is_restricted
+                    and not eligibility.flagged_for_review
+                )
+                initial_status = BookingStatus.APPROVED if auto_approve else BookingStatus.PENDING
+                approved_at = now if auto_approve else None
 
             # Generate unique human-readable booking code
             year_str = str(now.year)

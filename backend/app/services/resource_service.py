@@ -436,16 +436,83 @@ class ResourceService:
         today = datetime.now(timezone.utc).date()
         calendar_days: List[DayAvailability] = []
 
+        # 1. Fast batch prefetch: All 7 weekday availability schedules
+        avail_list = db.query(ResourceAvailability).filter_by(resource_id=resource.id).all()
+        avail_by_day = {av.day_of_week: av for av in avail_list}
+
+        # 2. Fast batch prefetch: Total active units
+        units = db.query(ResourceUnit).filter_by(resource_id=resource.id, is_active=True).all()
+        total_units = len(units) or resource.quantity or 1
+
+        # 3. Fast batch prefetch: All blackouts and bookings in 30-day window
+        window_start = datetime.combine(today, time(0, 0), tzinfo=timezone.utc)
+        window_end = datetime.combine(today + timedelta(days=30), time(23, 59, 59), tzinfo=timezone.utc)
+
+        blackouts = db.query(ResourceBlackout).filter(
+            ResourceBlackout.resource_id == resource.id,
+            ResourceBlackout.start_ts <= window_end,
+            ResourceBlackout.end_ts >= window_start
+        ).all()
+
+        active_bookings = db.query(Booking).filter(
+            Booking.resource_id == resource.id,
+            Booking.status.in_([BookingStatus.APPROVED, BookingStatus.CHECKED_OUT, BookingStatus.RETURN_PENDING]),
+            Booking.start_ts < window_end,
+            Booking.end_ts > window_start
+        ).all()
+
+        slot_minutes = resource.slot_minutes or 60
+
+        # 4. Pure in-memory computation (0 network calls)
         for i in range(30):
             target_date = today + timedelta(days=i)
-            slots = ResourceService.get_date_availability(db, resource, target_date)
-            free_slots = [s for s in slots if s.available]
+            weekday = target_date.weekday()
+            availability = avail_by_day.get(weekday)
 
-            if not slots:
+            if not availability:
+                calendar_days.append(DayAvailability(
+                    date=target_date.isoformat(),
+                    status="closed",
+                    free_slots_count=0
+                ))
+                continue
+
+            day_start = datetime.combine(target_date, time(0, 0), tzinfo=timezone.utc)
+            day_end = datetime.combine(target_date, time(23, 59, 59), tzinfo=timezone.utc)
+
+            day_blackouts = [b for b in blackouts if b.start_ts <= day_end and b.end_ts >= day_start]
+            day_bookings = [b for b in active_bookings if b.start_ts < day_end and b.end_ts > day_start]
+
+            curr_time = datetime.combine(target_date, availability.open_time, tzinfo=timezone.utc)
+            close_time = datetime.combine(target_date, availability.close_time, tzinfo=timezone.utc)
+
+            total_slots_count = 0
+            free_slots_count = 0
+
+            while curr_time + timedelta(minutes=slot_minutes) <= close_time:
+                slot_start = curr_time
+                slot_end = curr_time + timedelta(minutes=slot_minutes)
+                total_slots_count += 1
+
+                is_blackout = any(b.start_ts < slot_end and b.end_ts > slot_start for b in day_blackouts)
+                if not is_blackout:
+                    overlapping = [b for b in day_bookings if b.start_ts < slot_end and b.end_ts > slot_start]
+                    if resource.resource_type == ResourceType.FACILITY:
+                        used_cap = sum(b.attendees for b in overlapping)
+                        max_cap = resource.capacity or 30
+                        if max_cap - used_cap > 0:
+                            free_slots_count += 1
+                    else:
+                        if total_units - len(overlapping) > 0:
+                            free_slots_count += 1
+
+                curr_time += timedelta(minutes=slot_minutes)
+
+            if total_slots_count == 0:
                 day_status = "closed"
-            elif len(free_slots) == 0:
+            elif free_slots_count == 0:
                 day_status = "full"
-            elif len(free_slots) == len(slots):
+            elif free_slots_count == total_slots_count:
                 day_status = "free"
             else:
                 day_status = "partial"
@@ -453,7 +520,7 @@ class ResourceService:
             calendar_days.append(DayAvailability(
                 date=target_date.isoformat(),
                 status=day_status,
-                free_slots_count=len(free_slots)
+                free_slots_count=free_slots_count
             ))
 
         return calendar_days
