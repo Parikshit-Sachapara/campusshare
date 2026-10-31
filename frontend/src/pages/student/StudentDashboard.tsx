@@ -194,9 +194,9 @@ export const StudentDashboard: React.FC = () => {
               </div>
             </div>
           </div>
-          <Link to="/bookings">
+          <Link to={overdueOrEndingSoon[0] ? `/bookings?tab=CHECKED_OUT&bookingId=${overdueOrEndingSoon[0].id}&return=true` : `/bookings?tab=CHECKED_OUT`}>
             <Button variant="primary" size="sm" style={{ backgroundColor: 'var(--apricot-600)', borderColor: 'var(--apricot-600)' }}>
-              Return Items
+              Return Item
             </Button>
           </Link>
         </div>

@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Calendar,
@@ -38,7 +39,12 @@ export const MyBookingsPage: React.FC = () => {
   const queryClient = useQueryClient();
   const { addToast } = useToast();
 
-  const [activeTab, setActiveTab] = useState<string>('ALL');
+  const [searchParams] = useSearchParams();
+  const urlTab = searchParams.get('tab');
+  const urlBookingId = searchParams.get('bookingId');
+  const autoOpenReturn = searchParams.get('return') === 'true';
+
+  const [activeTab, setActiveTab] = useState<string>(urlTab || 'ALL');
   const [viewMode, setViewMode] = useState<'list' | 'calendar'>('list');
 
   // Drawer & Action states
@@ -63,6 +69,20 @@ export const MyBookingsPage: React.FC = () => {
         size: 50,
       }),
   });
+
+  // Automatically select and pop open the specific checked-out item when navigated from dashboard reminder
+  useEffect(() => {
+    if (urlBookingId && bookingsData?.items) {
+      const target = bookingsData.items.find((b) => b.id === urlBookingId);
+      if (target) {
+        setSelectedBooking(target);
+        setDrawerOpen(true);
+        if (autoOpenReturn) {
+          setReturnModalOpen(true);
+        }
+      }
+    }
+  }, [urlBookingId, autoOpenReturn, bookingsData]);
 
   // 2. Fetch Timeline for currently open booking in drawer
   const { data: timelineData, isLoading: timelineLoading } = useQuery({

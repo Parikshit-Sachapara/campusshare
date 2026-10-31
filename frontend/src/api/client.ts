@@ -41,7 +41,7 @@ const getApiBase = () => {
       return `http://${host}:8000`;
     }
     // Deployed to cloud (Vercel, Netlify, Render, etc.)
-    return 'https://campusshare.onrender.com';
+    return 'https://large-shrimps-shout.loca.lt';
   }
   return 'http://localhost:8000';
 };
@@ -87,6 +87,7 @@ class ApiClient {
     const url = endpoint.startsWith('http') ? endpoint : `${API_BASE}${endpoint}`;
     const headers: Record<string, string> = {
       Accept: 'application/json',
+      'bypass-tunnel-reminder': 'true',
       ...((options.headers as Record<string, string>) || {}),
     };
 
