@@ -223,6 +223,7 @@ class BookingService:
             # Student bookings are submitted for administrator & staff approval triage.
             # Owners/Admins/Managers booking directly may be auto-approved if no approval required.
             if user.role == UserRole.STUDENT:
+                auto_approve = False
                 initial_status = BookingStatus.PENDING
                 approved_at = None
             else:
