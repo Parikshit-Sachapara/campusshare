@@ -63,9 +63,20 @@ export const CampusPulseMap: React.FC<CampusPulseMapProps> = ({
         </div>
 
         {/* Controls: Date Picker & Block Filter */}
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="flex items-center bg-[var(--milk)] border border-[var(--oat-200)] rounded-xl px-3 py-1.5 shadow-sm text-xs">
-            <label htmlFor="pulse-date" className="text-[var(--ink-500)] mr-2 font-medium">
+        <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 'var(--space-3)' }}>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              backgroundColor: 'var(--milk)',
+              border: '1.5px solid var(--ink-border)',
+              borderRadius: 'var(--radius-md)',
+              padding: '6px 12px',
+              fontSize: 'var(--text-xs)',
+              boxShadow: 'var(--shadow-xs)',
+            }}
+          >
+            <label htmlFor="pulse-date" style={{ color: 'var(--ink-soft)', marginRight: 8, fontWeight: 600 }}>
               Date:
             </label>
             <input
@@ -73,20 +84,46 @@ export const CampusPulseMap: React.FC<CampusPulseMapProps> = ({
               type="date"
               value={selectedDate}
               onChange={(e) => setSelectedDate(e.target.value)}
-              className="bg-transparent text-[var(--ink-900)] font-medium focus:outline-none cursor-pointer"
+              style={{
+                background: 'transparent',
+                border: 'none',
+                color: 'var(--ink)',
+                fontWeight: 600,
+                outline: 'none',
+                cursor: 'pointer',
+                fontFamily: 'inherit',
+              }}
             />
           </div>
 
-          <div className="inline-flex rounded-xl p-1 bg-[var(--oat-100)] border border-[var(--oat-200)] text-xs">
+          <div
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              backgroundColor: 'var(--oat-100)',
+              border: '1.5px solid var(--ink-border)',
+              borderRadius: 'var(--radius-md)',
+              padding: 4,
+              gap: 4,
+            }}
+          >
             {['ALL', 'Block A', 'Block B', 'Block C'].map((b) => (
               <button
                 key={b}
+                type="button"
                 onClick={() => setSelectedBlock(b)}
-                className={`px-2.5 py-1 rounded-lg font-medium transition-all ${
-                  selectedBlock === b
-                    ? 'bg-[var(--milk)] text-[var(--ink-900)] shadow-sm'
-                    : 'text-[var(--ink-600)] hover:text-[var(--ink-900)]'
-                }`}
+                style={{
+                  padding: '5px 12px',
+                  borderRadius: 'var(--radius-sm)',
+                  border: selectedBlock === b ? '1.5px solid var(--fern-500)' : '1px solid transparent',
+                  backgroundColor: selectedBlock === b ? 'var(--milk)' : 'transparent',
+                  color: selectedBlock === b ? 'var(--fern-700)' : 'var(--ink-soft)',
+                  fontWeight: selectedBlock === b ? 700 : 500,
+                  fontSize: 'var(--text-xs)',
+                  cursor: 'pointer',
+                  transition: 'all 0.15s ease',
+                  boxShadow: selectedBlock === b ? 'var(--shadow-xs)' : 'none',
+                }}
               >
                 {b}
               </button>
@@ -96,23 +133,43 @@ export const CampusPulseMap: React.FC<CampusPulseMapProps> = ({
       </div>
 
       {/* Scrubber Bar: Hour-by-hour timeline replay */}
-      <div className="my-5 bg-[var(--milk)] border border-[var(--oat-200)] rounded-2xl p-4 shadow-sm">
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-semibold text-[var(--ink-700)] uppercase tracking-wide">
+      <div
+        style={{
+          margin: 'var(--space-4) 0',
+          backgroundColor: 'var(--milk)',
+          border: '1.5px solid var(--ink-border)',
+          borderRadius: 'var(--radius-card)',
+          padding: 'var(--space-4) var(--space-5)',
+          boxShadow: 'var(--shadow-xs)',
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--space-2)', flexWrap: 'wrap', gap: 8 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span style={{ fontSize: 'var(--text-xs)', fontWeight: 700, color: 'var(--ink-soft)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
               Time Scrubber:
             </span>
-            <span className="text-sm font-bold font-mono px-2 py-0.5 rounded bg-[var(--oat-100)] text-[var(--ink-900)] border border-[var(--oat-200)]">
-              {String(selectedHour).padStart(2, '0')}:00 – {String(selectedHour + 1).padStart(2, '0')}:00
+            <span
+              style={{
+                fontSize: 'var(--text-xs)',
+                fontWeight: 700,
+                fontFamily: 'var(--font-mono)',
+                padding: '2px 8px',
+                borderRadius: 'var(--radius-sm)',
+                backgroundColor: 'var(--fern-100)',
+                color: 'var(--fern-700)',
+                border: '1px solid var(--fern-300)',
+              }}
+            >
+              {String(selectedHour).padStart(2, '0')}:00 &ndash; {String(selectedHour + 1).padStart(2, '0')}:00
             </span>
           </div>
-          <span className="text-xs text-[var(--ink-500)]">
+          <span style={{ fontSize: 'var(--text-xs)', color: 'var(--ink-soft)' }}>
             Drag slider to inspect hourly historical or forecast occupancy
           </span>
         </div>
 
-        <div className="relative flex items-center gap-3">
-          <span className="text-xs font-mono font-medium text-[var(--ink-500)]">08:00</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <span style={{ fontSize: 'var(--text-xs)', fontFamily: 'var(--font-mono)', fontWeight: 600, color: 'var(--ink-soft)' }}>08:00</span>
           <input
             type="range"
             min={8}
@@ -120,20 +177,31 @@ export const CampusPulseMap: React.FC<CampusPulseMapProps> = ({
             step={1}
             value={selectedHour}
             onChange={(e) => setSelectedHour(Number(e.target.value))}
-            className="w-full h-2 bg-[var(--oat-200)] rounded-lg appearance-none cursor-pointer accent-[var(--fern-600)]"
+            style={{
+              width: '100%',
+              height: 8,
+              borderRadius: 4,
+              backgroundColor: 'var(--oat-200)',
+              outline: 'none',
+              cursor: 'pointer',
+              accentColor: 'var(--fern-600)',
+            }}
           />
-          <span className="text-xs font-mono font-medium text-[var(--ink-500)]">20:00</span>
+          <span style={{ fontSize: 'var(--text-xs)', fontFamily: 'var(--font-mono)', fontWeight: 600, color: 'var(--ink-soft)' }}>20:00</span>
         </div>
 
         {/* Hour markers */}
-        <div className="flex justify-between px-8 mt-1.5 text-[10px] font-mono text-[var(--ink-400)]">
+        <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0 20px', marginTop: 6, fontSize: 11, fontFamily: 'var(--font-mono)', color: 'var(--ink-mute)' }}>
           {Array.from({ length: 13 }, (_, i) => i + 8).map((h) => (
             <span
               key={h}
               onClick={() => setSelectedHour(h)}
-              className={`cursor-pointer transition-colors ${
-                selectedHour === h ? 'font-bold text-[var(--fern-700)] underline' : 'hover:text-[var(--ink-700)]'
-              }`}
+              style={{
+                cursor: 'pointer',
+                fontWeight: selectedHour === h ? 700 : 400,
+                color: selectedHour === h ? 'var(--fern-700)' : 'var(--ink-mute)',
+                textDecoration: selectedHour === h ? 'underline' : 'none',
+              }}
             >
               {h}h
             </span>

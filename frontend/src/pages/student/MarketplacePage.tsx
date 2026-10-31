@@ -149,17 +149,37 @@ export const MarketplacePage: React.FC = () => {
             </p>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)', flexWrap: 'wrap' }}>
             {/* View Mode Switcher */}
-            <div className="inline-flex rounded-xl p-1 bg-[var(--oat-100)] border border-[var(--oat-200)] text-xs">
+            <div
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                backgroundColor: 'var(--oat-100)',
+                border: '1.5px solid var(--ink-border)',
+                borderRadius: 'var(--radius-md)',
+                padding: 4,
+                gap: 4,
+              }}
+            >
               <button
                 type="button"
                 onClick={() => setViewMode('catalog')}
-                className={`px-3 py-1.5 rounded-lg font-medium flex items-center gap-1.5 transition-all ${
-                  viewMode === 'catalog'
-                    ? 'bg-[var(--milk)] text-[var(--ink-900)] shadow-xs font-bold'
-                    : 'text-[var(--ink-600)] hover:text-[var(--ink-900)]'
-                }`}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 6,
+                  padding: '6px 14px',
+                  borderRadius: 'var(--radius-sm)',
+                  border: viewMode === 'catalog' ? '1.5px solid var(--persimmon-500)' : '1px solid transparent',
+                  backgroundColor: viewMode === 'catalog' ? 'var(--milk)' : 'transparent',
+                  color: viewMode === 'catalog' ? 'var(--persimmon-600)' : 'var(--ink-soft)',
+                  fontWeight: viewMode === 'catalog' ? 700 : 500,
+                  fontSize: 'var(--text-xs)',
+                  cursor: 'pointer',
+                  transition: 'all 0.15s ease',
+                  boxShadow: viewMode === 'catalog' ? 'var(--shadow-xs)' : 'none',
+                }}
               >
                 <Layers size={14} />
                 <span>Catalog Grid</span>
@@ -167,11 +187,21 @@ export const MarketplacePage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setViewMode('map')}
-                className={`px-3 py-1.5 rounded-lg font-medium flex items-center gap-1.5 transition-all ${
-                  viewMode === 'map'
-                    ? 'bg-[var(--milk)] text-[var(--fern-700)] shadow-xs font-bold'
-                    : 'text-[var(--ink-600)] hover:text-[var(--ink-900)]'
-                }`}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 6,
+                  padding: '6px 14px',
+                  borderRadius: 'var(--radius-sm)',
+                  border: viewMode === 'map' ? '1.5px solid var(--fern-500)' : '1px solid transparent',
+                  backgroundColor: viewMode === 'map' ? 'var(--milk)' : 'transparent',
+                  color: viewMode === 'map' ? 'var(--fern-700)' : 'var(--ink-soft)',
+                  fontWeight: viewMode === 'map' ? 700 : 500,
+                  fontSize: 'var(--text-xs)',
+                  cursor: 'pointer',
+                  transition: 'all 0.15s ease',
+                  boxShadow: viewMode === 'map' ? 'var(--shadow-xs)' : 'none',
+                }}
               >
                 <MapPin size={14} />
                 <span>Browse by Map</span>
@@ -179,11 +209,21 @@ export const MarketplacePage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setViewMode('buddy')}
-                className={`px-3 py-1.5 rounded-lg font-medium flex items-center gap-1.5 transition-all ${
-                  viewMode === 'buddy'
-                    ? 'bg-[var(--milk)] text-[var(--lilac-700)] shadow-xs font-bold'
-                    : 'text-[var(--ink-600)] hover:text-[var(--ink-900)]'
-                }`}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 6,
+                  padding: '6px 14px',
+                  borderRadius: 'var(--radius-sm)',
+                  border: viewMode === 'buddy' ? '1.5px solid var(--lilac-500)' : '1px solid transparent',
+                  backgroundColor: viewMode === 'buddy' ? 'var(--milk)' : 'transparent',
+                  color: viewMode === 'buddy' ? 'var(--lilac-700)' : 'var(--ink-soft)',
+                  fontWeight: viewMode === 'buddy' ? 700 : 500,
+                  fontSize: 'var(--text-xs)',
+                  cursor: 'pointer',
+                  transition: 'all 0.15s ease',
+                  boxShadow: viewMode === 'buddy' ? 'var(--shadow-xs)' : 'none',
+                }}
               >
                 <Bot size={14} />
                 <span>Project Buddy (AI)</span>
