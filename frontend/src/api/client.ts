@@ -41,7 +41,7 @@ const getApiBase = () => {
       return `http://${host}:8000`;
     }
     // Deployed to cloud (Vercel, Netlify, Render, etc.)
-    return 'https://large-shrimps-shout.loca.lt';
+    return 'https://campusshare-backend.loca.lt';
   }
   return 'http://localhost:8000';
 };
