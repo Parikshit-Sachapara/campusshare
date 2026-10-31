@@ -39,10 +39,11 @@ export const MyBookingsPage: React.FC = () => {
   const queryClient = useQueryClient();
   const { addToast } = useToast();
 
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const urlTab = searchParams.get('tab');
   const urlBookingId = searchParams.get('bookingId');
   const autoOpenReturn = searchParams.get('return') === 'true';
+  const hasAutoOpenedRef = React.useRef(false);
 
   const [activeTab, setActiveTab] = useState<string>(urlTab || 'ALL');
   const [viewMode, setViewMode] = useState<'list' | 'calendar'>('list');
@@ -70,19 +71,25 @@ export const MyBookingsPage: React.FC = () => {
       }),
   });
 
-  // Automatically select and pop open the specific checked-out item when navigated from dashboard reminder
+  // Automatically select and pop open the specific checked-out item ONCE when navigated from dashboard reminder
   useEffect(() => {
-    if (urlBookingId && bookingsData?.items) {
+    if (!hasAutoOpenedRef.current && urlBookingId && bookingsData?.items) {
       const target = bookingsData.items.find((b) => b.id === urlBookingId);
       if (target) {
+        hasAutoOpenedRef.current = true;
         setSelectedBooking(target);
         setDrawerOpen(true);
         if (autoOpenReturn) {
           setReturnModalOpen(true);
         }
+        // Clean URL so subsequent tab changes do not re-trigger the modal
+        const nextParams = new URLSearchParams(searchParams);
+        nextParams.delete('bookingId');
+        nextParams.delete('return');
+        setSearchParams(nextParams, { replace: true });
       }
     }
-  }, [urlBookingId, autoOpenReturn, bookingsData]);
+  }, [urlBookingId, autoOpenReturn, bookingsData, searchParams, setSearchParams]);
 
   // 2. Fetch Timeline for currently open booking in drawer
   const { data: timelineData, isLoading: timelineLoading } = useQuery({
@@ -260,7 +267,10 @@ export const MyBookingsPage: React.FC = () => {
       {/* Status Tabs */}
       <Tabs
         activeTab={activeTab}
-        onChange={setActiveTab}
+        onChange={(tab) => {
+          setActiveTab(tab);
+          setReturnModalOpen(false);
+        }}
         tabs={[
           { id: 'ALL', label: 'All Passes' },
           { id: 'APPROVED', label: 'Ready for Pickup' },
