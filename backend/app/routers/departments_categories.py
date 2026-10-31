@@ -40,7 +40,7 @@ def get_public_stats(db: Session = Depends(get_db)):
     """
     Returns live platform usage KPIs for the public landing hero.
     """
-    res_count = db.query(Resource).filter_by(is_active=True).count()
+    res_count = db.query(Resource).count()
     booking_count = db.query(Booking).count()
     user_count = db.query(Profile).filter_by(is_active=True).count()
     dept_count = db.query(Department).count()

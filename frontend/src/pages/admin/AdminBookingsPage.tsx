@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   FileText,
   Download,
   Search,
   Filter,
   CheckCircle2,
+  XCircle,
   Clock,
 } from 'lucide-react';
 import { api } from '../../api/client';
@@ -16,11 +17,14 @@ import {
   Select,
   Skeleton,
   EmptyState,
+  useToast,
 } from '../../components/ui';
 
 export const AdminBookingsPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
+  const queryClient = useQueryClient();
+  const { addToast } = useToast();
 
   // Fetch bookings
   const { data: bookingsData, isLoading, refetch } = useQuery({
@@ -30,6 +34,48 @@ export const AdminBookingsPage: React.FC = () => {
         status: statusFilter !== 'ALL' ? statusFilter : undefined,
         size: 100,
       }),
+  });
+
+  const approveMutation = useMutation({
+    mutationFn: (id: string) => api.approveBooking(id),
+    onSuccess: (b) => {
+      addToast({
+        title: 'Booking Approved',
+        message: `Pass code #${b.booking_code} issued for ${b.resource_name}.`,
+        variant: 'success',
+      });
+      queryClient.invalidateQueries({ queryKey: ['admin-all-bookings'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-approval-queue'] });
+      queryClient.invalidateQueries({ queryKey: ['analytics-overview'] });
+    },
+    onError: (err: unknown) => {
+      addToast({
+        title: 'Approval Error',
+        message: (err as Error).message,
+        variant: 'danger',
+      });
+    },
+  });
+
+  const rejectMutation = useMutation({
+    mutationFn: (id: string) => api.rejectBooking(id, 'Declined by Administrator during triage'),
+    onSuccess: () => {
+      addToast({
+        title: 'Booking Rejected',
+        message: 'Applicant has been notified and slot released.',
+        variant: 'neutral',
+      });
+      queryClient.invalidateQueries({ queryKey: ['admin-all-bookings'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-approval-queue'] });
+      queryClient.invalidateQueries({ queryKey: ['analytics-overview'] });
+    },
+    onError: (err: unknown) => {
+      addToast({
+        title: 'Rejection Error',
+        message: (err as Error).message,
+        variant: 'danger',
+      });
+    },
   });
 
   const bookings = (bookingsData?.items || []).filter((b) => {
@@ -175,6 +221,27 @@ export const AdminBookingsPage: React.FC = () => {
                 >
                   {b.status}
                 </Badge>
+
+                {b.status === 'PENDING' && (
+                  <div style={{ display: 'flex', gap: 6, marginLeft: 8 }}>
+                    <Button
+                      size="sm"
+                      variant="primary"
+                      loading={approveMutation.isPending && approveMutation.variables === b.id}
+                      onClick={() => approveMutation.mutate(b.id)}
+                    >
+                      Approve
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      loading={rejectMutation.isPending && rejectMutation.variables === b.id}
+                      onClick={() => rejectMutation.mutate(b.id)}
+                    >
+                      Reject
+                    </Button>
+                  </div>
+                )}
               </div>
             </div>
           ))}

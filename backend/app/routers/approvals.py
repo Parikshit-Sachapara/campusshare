@@ -31,6 +31,7 @@ def get_approval_queue(
     return ApprovalService.get_approval_queue(db=db, user=user)
 
 @router.post("/bookings/{id}/approve", response_model=BookingResponse)
+@router.post("/approvals/{id}/approve", response_model=BookingResponse)
 def approve_booking(
     id: uuid.UUID,
     request: Request,
@@ -45,6 +46,7 @@ def approve_booking(
     return BookingResponse.model_validate(approved)
 
 @router.post("/bookings/{id}/reject", response_model=BookingResponse)
+@router.post("/approvals/{id}/reject", response_model=BookingResponse)
 def reject_booking(
     id: uuid.UUID,
     body: ApprovalRejectRequest,
