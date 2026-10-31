@@ -34,4 +34,4 @@ class InMemoryRateLimiter:
         with self.lock:
             self.requests.clear()
 
-login_rate_limiter = InMemoryRateLimiter(max_requests=5, window_seconds=60)
+login_rate_limiter = InMemoryRateLimiter(max_requests=100, window_seconds=60)

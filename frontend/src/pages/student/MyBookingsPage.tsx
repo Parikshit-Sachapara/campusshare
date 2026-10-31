@@ -42,10 +42,10 @@ export const MyBookingsPage: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const urlTab = searchParams.get('tab');
   const urlBookingId = searchParams.get('bookingId');
-  const autoOpenReturn = searchParams.get('return') === 'true';
   const hasAutoOpenedRef = React.useRef(false);
 
   const [activeTab, setActiveTab] = useState<string>(urlTab || 'ALL');
+  const [focusedBookingId, setFocusedBookingId] = useState<string | null>(urlBookingId);
   const [viewMode, setViewMode] = useState<'list' | 'calendar'>('list');
 
   // Drawer & Action states
@@ -61,7 +61,7 @@ export const MyBookingsPage: React.FC = () => {
   const [returnNotes, setReturnNotes] = useState('');
   const [returnPhotoUrl, setReturnPhotoUrl] = useState('');
 
-  // 1. Fetch Student Bookings
+  // 1. Fetch Student Bookings with live 5s poll
   const { data: bookingsData, isLoading, refetch } = useQuery({
     queryKey: ['my-bookings', activeTab],
     queryFn: () =>
@@ -69,9 +69,10 @@ export const MyBookingsPage: React.FC = () => {
         status: activeTab !== 'ALL' ? activeTab : undefined,
         size: 50,
       }),
+    refetchInterval: 5000,
   });
 
-  // Automatically select and pop open the specific checked-out item ONCE when navigated from dashboard reminder
+  // Automatically select and isolate the specific checked-out item ONCE when navigated from dashboard reminder
   useEffect(() => {
     if (!hasAutoOpenedRef.current && urlBookingId && bookingsData?.items) {
       const target = bookingsData.items.find((b) => b.id === urlBookingId);
@@ -79,17 +80,14 @@ export const MyBookingsPage: React.FC = () => {
         hasAutoOpenedRef.current = true;
         setSelectedBooking(target);
         setDrawerOpen(true);
-        if (autoOpenReturn) {
-          setReturnModalOpen(true);
-        }
-        // Clean URL so subsequent tab changes do not re-trigger the modal
+        // Clean URL so subsequent tab changes do not re-trigger or flash
         const nextParams = new URLSearchParams(searchParams);
         nextParams.delete('bookingId');
         nextParams.delete('return');
         setSearchParams(nextParams, { replace: true });
       }
     }
-  }, [urlBookingId, autoOpenReturn, bookingsData, searchParams, setSearchParams]);
+  }, [urlBookingId, bookingsData, searchParams, setSearchParams]);
 
   // 2. Fetch Timeline for currently open booking in drawer
   const { data: timelineData, isLoading: timelineLoading } = useQuery({
@@ -180,7 +178,10 @@ export const MyBookingsPage: React.FC = () => {
     },
   });
 
-  const bookings = bookingsData?.items || [];
+  const rawBookings = bookingsData?.items || [];
+  const bookings = focusedBookingId
+    ? rawBookings.filter((b) => b.id === focusedBookingId)
+    : rawBookings;
 
   const handleOpenDrawer = (booking: Booking) => {
     setSelectedBooking(booking);
@@ -269,6 +270,7 @@ export const MyBookingsPage: React.FC = () => {
         activeTab={activeTab}
         onChange={(tab) => {
           setActiveTab(tab);
+          setFocusedBookingId(null);
           setReturnModalOpen(false);
         }}
         tabs={[
@@ -280,6 +282,47 @@ export const MyBookingsPage: React.FC = () => {
           { id: 'CANCELLED', label: 'Cancelled' },
         ]}
       />
+
+      {/* Focused Return Notice if navigating directly to return an item */}
+      {focusedBookingId && (
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '12px 18px',
+            backgroundColor: 'var(--apricot-100)',
+            border: '1.5px solid var(--persimmon-500)',
+            borderRadius: 'var(--radius-card)',
+            boxShadow: '0 2px 8px rgba(235, 94, 40, 0.1)',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 'var(--text-sm)', color: 'var(--ink)' }}>
+            <span style={{ fontSize: '10px', textTransform: 'uppercase', padding: '2px 8px', borderRadius: 4, backgroundColor: 'var(--persimmon-500)', color: 'var(--milk)', fontWeight: 700 }}>
+              Focused Return
+            </span>
+            <span>
+              Showing item to return: <strong>{bookings[0]?.resource_name || 'Checked-out Resource'}</strong> ({bookings[0]?.booking_code})
+            </span>
+          </div>
+          <button
+            type="button"
+            onClick={() => setFocusedBookingId(null)}
+            style={{
+              background: 'none',
+              border: '1px solid var(--persimmon-500)',
+              borderRadius: 'var(--radius-sm)',
+              padding: '4px 12px',
+              color: 'var(--persimmon-600)',
+              fontSize: 'var(--text-xs)',
+              fontWeight: 600,
+              cursor: 'pointer',
+            }}
+          >
+            Show All Passes
+          </button>
+        </div>
+      )}
 
       {/* Main Content Area */}
       {isLoading ? (
@@ -447,6 +490,14 @@ export const MyBookingsPage: React.FC = () => {
                   onClick={() => confirmPickupMutation.mutate(selectedBooking.id)}
                   loading={confirmPickupMutation.isPending}
                   leftIcon={<CheckCircle2 size={16} />}
+                  style={{
+                    backgroundColor: 'var(--persimmon-500)',
+                    borderColor: 'var(--persimmon-500)',
+                    color: 'var(--milk)',
+                    borderRadius: 'var(--radius-md)',
+                    fontWeight: 600,
+                    boxShadow: '0 2px 8px rgba(235, 94, 40, 0.25)',
+                  }}
                 >
                   Confirm Physical Pickup
                 </Button>

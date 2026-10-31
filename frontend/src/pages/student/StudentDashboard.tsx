@@ -32,10 +32,11 @@ export const StudentDashboard: React.FC = () => {
   const navigate = useNavigate();
   const [showBuddy, setShowBuddy] = React.useState<boolean>(false);
 
-  // 1. Fetch current student's bookings
+  // 1. Fetch current student's bookings (live 5s poll)
   const { data: bookingsData, isLoading: bookingsLoading } = useQuery({
     queryKey: ['my-bookings', 'dashboard'],
     queryFn: () => api.getMyBookings({ size: 10 }),
+    refetchInterval: 5000,
   });
 
   // 2. Fetch AI / Recommended resources (Personalized)
@@ -50,10 +51,11 @@ export const StudentDashboard: React.FC = () => {
     queryFn: () => api.getFairnessProfile(),
   });
 
-  // 4. Fetch waitlist entries
+  // 4. Fetch waitlist entries (live 5s poll)
   const { data: waitlistData } = useQuery({
     queryKey: ['my-waitlist'],
     queryFn: () => api.listMyWaitlist(),
+    refetchInterval: 5000,
   });
 
   const bookings = bookingsData?.items || [];
@@ -61,9 +63,11 @@ export const StudentDashboard: React.FC = () => {
   const pendingBookings = bookings.filter((b) => b.status === 'PENDING');
   const soonestBooking = activeBookings[0] || bookings[0];
 
-  // Return reminder check
+  // Return reminder check: Only physical equipment currently in user's hands (not facilities, not already returned/pending)
   const overdueOrEndingSoon = bookings.filter(
-    (b) => b.status === 'CHECKED_OUT' || b.status === 'OVERDUE'
+    (b) =>
+      (b.status === 'CHECKED_OUT' || b.status === 'OVERDUE') &&
+      b.resource_type !== 'FACILITY'
   );
 
   const currentDateStr = new Intl.DateTimeFormat('en-US', {
@@ -160,42 +164,62 @@ export const StudentDashboard: React.FC = () => {
         <div
           style={{
             backgroundColor: 'var(--apricot-100)',
-            border: '1.5px solid var(--apricot-500)',
+            border: '1.5px solid var(--persimmon-500)',
             borderRadius: 'var(--radius-card)',
             padding: 'var(--space-4) var(--space-5)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
             gap: 'var(--space-4)',
+            boxShadow: '0 4px 16px rgba(235, 94, 40, 0.08)',
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
             <div
               style={{
-                width: 36,
-                height: 36,
+                width: 38,
+                height: 38,
                 borderRadius: 'var(--radius-full)',
-                backgroundColor: 'var(--apricot-500)',
+                backgroundColor: 'var(--persimmon-500)',
                 color: 'var(--milk)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 flexShrink: 0,
+                boxShadow: '0 2px 8px rgba(235, 94, 40, 0.3)',
               }}
             >
-              <Clock size={18} />
+              <Clock size={19} />
             </div>
             <div>
-              <div style={{ fontWeight: 700, color: 'var(--ink)', fontSize: 'var(--text-sm)' }}>
-                Equipment Return Reminder
+              <div style={{ fontWeight: 700, color: 'var(--ink)', fontSize: 'var(--text-sm)', display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span>Equipment Handover & Return Reminder</span>
+                <span style={{ fontSize: '10px', textTransform: 'uppercase', padding: '2px 6px', borderRadius: 4, backgroundColor: 'var(--persimmon-500)', color: 'var(--milk)', fontWeight: 700 }}>
+                  Action Needed
+                </span>
               </div>
-              <div style={{ color: 'var(--ink-soft)', fontSize: 'var(--text-xs)' }}>
-                You have {overdueOrEndingSoon.length} item(s) checked out. Please return before the booked end time to preserve your 100% on-time record.
+              <div style={{ color: 'var(--ink-soft)', fontSize: 'var(--text-xs)', marginTop: 2 }}>
+                You have {overdueOrEndingSoon.length} item(s) checked out. Click to inspect handover details and return smoothly.
               </div>
             </div>
           </div>
-          <Link to={overdueOrEndingSoon[0] ? `/bookings?tab=CHECKED_OUT&bookingId=${overdueOrEndingSoon[0].id}&return=true` : `/bookings?tab=CHECKED_OUT`}>
-            <Button variant="primary" size="sm" style={{ backgroundColor: 'var(--apricot-600)', borderColor: 'var(--apricot-600)' }}>
+          <Link
+            to={overdueOrEndingSoon[0] ? `/bookings?tab=CHECKED_OUT&bookingId=${overdueOrEndingSoon[0].id}` : `/bookings?tab=CHECKED_OUT`}
+            style={{ textDecoration: 'none' }}
+          >
+            <Button
+              variant="primary"
+              size="sm"
+              style={{
+                backgroundColor: 'var(--persimmon-500)',
+                borderColor: 'var(--persimmon-500)',
+                color: 'var(--milk)',
+                fontWeight: 600,
+                borderRadius: 'var(--radius-full)',
+                padding: '8px 18px',
+                boxShadow: '0 2px 8px rgba(235, 94, 40, 0.25)',
+              }}
+            >
               Return Item
             </Button>
           </Link>

@@ -41,7 +41,7 @@ const getApiBase = () => {
       return `http://${host}:8000`;
     }
     // Cloudflare public tunnel (zero interstitial screen, zero CORS block, works globally)
-    return 'https://punk-hong-axis-missions.trycloudflare.com';
+    return 'https://set-katie-typically-quarters.trycloudflare.com';
   }
   return 'http://localhost:8000';
 };
@@ -100,14 +100,19 @@ class ApiClient {
       headers['Authorization'] = `Bearer ${token}`;
     }
 
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 12000);
+
     const config: RequestInit = {
       ...options,
       headers,
       credentials: 'include',
+      signal: options.signal || controller.signal,
     };
 
     try {
       const response = await fetch(url, config);
+      clearTimeout(timeoutId);
 
       if (response.status === 401 && !isRetry && !endpoint.includes('/auth/login') && !endpoint.includes('/auth/refresh')) {
         if (!this.isRefreshing) {
